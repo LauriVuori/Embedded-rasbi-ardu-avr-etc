@@ -1,5 +1,6 @@
 # https://github.com/rm-hull/luma.led_matrix/blob/master/doc/python-usage.rst
 # sudo pip3 install --upgrade --force-reinstall luma.led-matrix luma.core
+#https://xantorohara.github.io/led-matrix-editor/#00000000000000ff led matrix
 import time
 
 from luma.core.interface.serial import spi, noop
@@ -25,6 +26,18 @@ def name():
     for i in range(len(string)):
         with canvas(device) as draw:
             text(draw, (colum, row), string[i], fill="white", font=proportional(CP437_FONT))
+        device.contrast(0x80)
+        time.sleep(sleepTime)
+        device.contrast(0x10)
+        time.sleep(sleepTime)
+        time.sleep(sleepTime)
+
+def drawDots():
+    sleepTime = 0.5
+    i = 0
+    while i < 15:
+        with canvas(device) as draw:
+            draw.point((1, 0), fill=color)
         time.sleep(sleepTime)
 
 # with canvas(virtual) as draw:
@@ -46,4 +59,5 @@ def name():
 #     time.sleep(0.5)
 #     i += 1
 
-name()
+# name()
+drawDots()
