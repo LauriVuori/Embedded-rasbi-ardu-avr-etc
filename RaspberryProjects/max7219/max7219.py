@@ -37,9 +37,29 @@ def drawDots():
     i = 0
     while i < 15:
         with canvas(device) as draw:
-            draw.point((1, 0), fill=color)
+            draw.point((i, 0), fill="white")
         time.sleep(sleepTime)
+        i+=1
 
+def drawFromArray():
+    sleepTime = 0.5
+    test = [  
+    "11111111",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000"]
+    for row in range(len(test)):
+        for col in range(len(test[row])):
+            if  (test[row][col] == '1'):
+                with canvas(device) as draw:
+                    print("asd")
+                    draw.point((row, col), fill="white")
+                time.sleep(sleepTime)
+    time.sleep(sleepTime)
 # with canvas(virtual) as draw:
 #     draw.rectangle(device.bounding_box, outline="white", fill="black")
 #     draw.text((3, 3), "Hello world", fill="white")
@@ -71,9 +91,11 @@ def drawDots():
 # :#o -> converts to octal
 # :#x -> converts to hexadecimal 
 # :#0 -> converts to decimal as above example
-b = 0b11 # b = binary digit
-a = f'{b:#0}' # a = decimal from b
-print(a)
+# b = 0b11 # b = binary digit
+# a = f'{b:#0}' # a = decimal from b
+# print(a)
 
 # name()
-drawDots()
+# drawDots()
+for i in range(5):  
+    drawFromArray()
