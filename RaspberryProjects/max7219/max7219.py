@@ -59,5 +59,21 @@ def drawDots():
 #     time.sleep(0.5)
 #     i += 1
 
+# >>> f'{0b1011010:#o}'
+# '0o132'  # octal
+
+# >>> f'{0b1011010:#x}'
+# '0x5a'   # hexadecimal
+
+# >>> f'{0b1011010:#0}'
+# '90'     # decimal
+# :#b -> converts to binary
+# :#o -> converts to octal
+# :#x -> converts to hexadecimal 
+# :#0 -> converts to decimal as above example
+b = 0b11 # b = binary digit
+a = f'{b:#0}' # a = decimal from b
+print(a)
+
 # name()
 drawDots()
