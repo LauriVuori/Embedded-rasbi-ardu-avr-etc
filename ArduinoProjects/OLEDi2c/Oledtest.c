@@ -44,6 +44,7 @@ void testdrawchar(char print[]) {
     // drawing commands to make them visible on screen!
     display.display();
     delay(2000);
+    display.clearDisplay();
     // display.display() is NOT necessary after every single drawing command,
     // unless that's what you want...rather, you can batch up a bunch of
     // drawing operations and then update the screen all at once by calling
