@@ -1,0 +1,8 @@
+﻿Error during compilation : Traceback (most recent call last):
+  File "E:\ATMEL STUDIO\7.0\EXTENSIONS\ATMEL\AS-VSIX-ATMELKITS\7.0.132\KitWindow.py", line 3, in <module>
+  File "E:\Atmel studio\7.0\IronPython\Lib\os.py", line 398, in <module>
+  File "E:\Atmel studio\7.0\IronPython\Lib\UserDict.py", line 83, in <module>
+  File "E:\Atmel studio\7.0\IronPython\Lib\_abcoll.py", line 70, in <module>
+  File "E:\Atmel studio\7.0\IronPython\Lib\abc.py", line 108, in register
+  File "E:\Atmel studio\7.0\IronPython\Lib\abc.py", line 183, in __subclasscheck__
+SystemError: Object reference not set to an instance of an object.
