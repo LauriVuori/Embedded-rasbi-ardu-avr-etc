@@ -1,40 +1,35 @@
-import socket
+from socket import *
+from time  import sleep
 
-HOST = '' # Server IP or Hostname
-PORT = 12345 # Pick an open Port (1000+ recommended), must match the client sport
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print 'Socket created'
+HOST = ''
+PORT = 1112
+ADDR = (HOST, PORT)
+BUFSIZE = 4096
 
-#managing error exception
-try:
-	s.bind((HOST, PORT))
-	except socket.error:
-	print 'Bind failed '
+serv = socket(AF_INET, SOCK_STREAM)
 
-	s.listen(5)
-	print 'Socket awaiting messages'
-	(conn, addr) = s.accept()
-	print 'Connected'
+serv.bind((ADDR))
+serv.listen(5)
+serv = socket(AF_INET, SOCK_STREAM)
 
-# awaiting for message
+serv.bind((ADDR))
+serv.listen(5)
+
+print("Waiting for connections...")
+# accept the connection
+conn, addr = serv.accept()
+string = "Connected"
+string_encoded = string.encode()
+conn.send(string_encoded)
+print("...connected!")
+
 while True:
-	data = conn.recv(1024)
-	print 'I sent a message back in response to: ' + data
-	reply = ''
-
-	# process your message
-	if data == 'Hello':
-		reply = 'Hi, back!'
-		elif data == 'This is important':
-		reply = 'OK, I have done the important thing you have asked me!'
-
-	#and so on and on until...
-	elif data == 'quit':
-		conn.send('Terminating')
-		break
-	else:
-		reply = 'Unknown command'
-
-	# Sending reply
-	conn.send(reply)
-	conn.close() # Close connections
+    data = conn.recv(1024)
+    decoded = data.decode('utf-8')
+    print("Received:")
+    print(decoded)
+    conn.send(data)
+    if (decoded == "quit"):
+        print("Shutdown")
+        conn.close()
+        break

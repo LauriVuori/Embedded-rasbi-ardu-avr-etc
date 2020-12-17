@@ -1,15 +1,22 @@
 import socket
+from time import sleep
 
-HOST = '' # Enter IP or Hostname of your server
-PORT = 12345 # Pick an open Port (1000+ recommended), must match the server port
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST,PORT))
+HOST = '192.168.0.101'
+PORT = 1112
+socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+socket.connect((HOST, PORT))
 
-#Lets loop awaiting for your input
+# Get message from host
+print("Waiting message from host...")
+reply = socket.recv(1024)
+reply = reply.decode('utf-8')
+print(reply)
+
 while True:
-	command = raw_input('Enter your command: ')
-	s.send(command)
-	reply = s.recv(1024)
-		if reply == 'Terminate':
-			break
-		print reply
+    command = input('Enter your command: ')
+    string_encoded = command.encode()
+    socket.send(string_encoded)
+    sleep(1)
+    if (command == "quit"):
+        print("Shutdown")
+        break
