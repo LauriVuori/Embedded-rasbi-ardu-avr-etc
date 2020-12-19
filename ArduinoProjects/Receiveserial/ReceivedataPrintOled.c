@@ -7,14 +7,14 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+// arduino nano A4 (SDA), A5 (SCL)
 #define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 char receivedChar;
-boolaw newData = false;
+bool  newData = false;
 const int D12 = 12;
 
-void testdrawchar(char print);
 
 void setup() {
     
@@ -31,11 +31,32 @@ void setup() {
 }
 
 void loop() {
-    recvOneChar();
-    showNewData();
+    char* command;
+
+    // recvOneChar();
+    // showNewData();
+    testdrawchar(&test);
+    // newData = false;
 }
 
-void testdrawchar(char print) {
+/**
+ * @brief receive text arrays from serialcoms.
+ * 
+ */
+char receiveArray(){
+    
+    
+}
+
+
+
+
+
+/**
+ * @brief print text on screen
+ * @param char* command
+ */
+void testdrawchar(char* command) {
     display.clearDisplay();
     //Size 3 approx 7 letters in one line
     display.setTextSize(2);      // Normal 1:1 pixel scale
@@ -43,7 +64,7 @@ void testdrawchar(char print) {
     display.setCursor(0, 0);     // Start at top-left corner
     display.cp437(true);         // Use full 256 char 'Code Page 437' font
 
-    display.write(print);
+    display.write(command);
     // Show the display buffer on the screen. You MUST call display() after
     // drawing commands to make them visible on screen!
     display.display();
