@@ -14,7 +14,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 char receivedChar;
 bool  newData = false;
 const int D12 = 12;
-
+struct Commands {
+    char command[256];
+};
 
 void setup() {
     
@@ -31,22 +33,46 @@ void setup() {
 }
 
 void loop() {
-    char* command;
-
+    // struct Commands command = {" "} 
+    // char command[32];
+    // receiveArray(command);
+    // test();
     // recvOneChar();
     // showNewData();
-    testdrawchar(&test);
+    // testdrawchar(command);
     // newData = false;
 }
 
+void serialEvent() {
+  Serial.println("Test");
+}
+
+// void test(){
+//      if (Serial.available() > 0) {
+//          Serial.available()
+//         receivedChar = Serial.read();
+//         newData = true;
+//     }
+// }
 /**
  * @brief receive text arrays from serialcoms.
  * 
  */
-char receiveArray(){
-    
-    
-}
+// void receiveArray(char* command){
+//     while (!Serial.available()) {
+//         delay (10);
+//         int i = 0;
+//         int k = Serial.available(); 
+//         while (k  > 0){     
+//             char inchar = Serial.read();  //read one by one character    
+//             command[i] = inchar;               
+//             i++;    
+//         if (k < 3) delay (10); //it gives possibility to collect more characters on stream    
+//             k = Serial.available();     
+//     }  
+//         i++;
+//     }
+// }
 
 
 
@@ -56,43 +82,43 @@ char receiveArray(){
  * @brief print text on screen
  * @param char* command
  */
-void testdrawchar(char* command) {
-    display.clearDisplay();
-    //Size 3 approx 7 letters in one line
-    display.setTextSize(2);      // Normal 1:1 pixel scale
-    display.setTextColor(SSD1306_WHITE); // Draw white text
-    display.setCursor(0, 0);     // Start at top-left corner
-    display.cp437(true);         // Use full 256 char 'Code Page 437' font
+// void testdrawchar() {
+//     display.clearDisplay();
+//     //Size 3 approx 7 letters in one line
+//     display.setTextSize(2);      // Normal 1:1 pixel scale
+//     display.setTextColor(SSD1306_WHITE); // Draw white text
+//     display.setCursor(0, 0);     // Start at top-left corner
+//     display.cp437(true);         // Use full 256 char 'Code Page 437' font
 
-    display.write(command);
-    // Show the display buffer on the screen. You MUST call display() after
-    // drawing commands to make them visible on screen!
-    display.display();
-    delay(10);
-    // display.display() is NOT necessary after every single drawing command,
-    // unless that's what you want...rather, you can batch up a bunch of
-    // drawing operations and then update the screen all at once by calling
-    // display.display().
-}
+//     display.write();
+//     // Show the display buffer on the screen. You MUST call display() after
+//     // drawing commands to make them visible on screen!
+//     display.display();
+//     delay(10);
+//     // display.display() is NOT necessary after every single drawing command,
+//     // unless that's what you want...rather, you can batch up a bunch of
+//     // drawing operations and then update the screen all at once by calling
+//     // display.display().
+// }
 
-void recvOneChar() {
-    if (Serial.available() > 0) {
-        receivedChar = Serial.read();
-        newData = true;
-    }
-}
+// void recvOneChar() {
+//     if (Serial.available() > 0) {
+//         receivedChar = Serial.read();
+//         newData = true;
+//     }
+// }
 
-void showNewData() {
-    if (newData == true) {
-        Serial.print("Received: ");
-        Serial.println(receivedChar);
-        testdrawchar(receivedChar);
-        digitalWrite(LED_BUILTIN, HIGH); 
-        digitalWrite(D12, HIGH);  
-        delay(10);                       
-        digitalWrite(LED_BUILTIN, LOW); 
-        digitalWrite(D12, LOW);     
-        delay(10);        
-        newData = false;
-    }
-}
+// void showNewData() {
+//     if (newData == true) {
+//         Serial.print("Received: ");
+//         Serial.println(receivedChar);
+//         testdrawchar(receivedChar);
+//         digitalWrite(LED_BUILTIN, HIGH); 
+//         digitalWrite(D12, HIGH);  
+//         delay(10);                       
+//         digitalWrite(LED_BUILTIN, LOW); 
+//         digitalWrite(D12, LOW);     
+//         delay(10);        
+//         newData = false;
+//     }
+// }

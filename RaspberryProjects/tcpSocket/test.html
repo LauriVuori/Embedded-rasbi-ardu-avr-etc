@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+        <head>
+
+                <title>terve</title>  
+        </head>
+<body>
+
+<script type='text/javascript'>
+var ws = new WebSocket("")
+ws.onmessage = (event) => {
+    console.log("onmessage: ", event.data)
+}
+ws.onopen = () => {
+    console.log("onopen")
+    ws.send(JSON.stringify(
+        {
+            command: "connect",
+            host: "192.168.0.101",
+            port: 1112
+        }
+    ))
+    ws.send(JSON.stringify(
+        {
+            command: "send",
+            data: "GET / HTTP/1.1\r\nHost: feling.net\r\nConnection: close\r\n\r\n"
+        }
+    ))
+}
+ws.onclose = () => {
+    console.log("onclose")
+}    
+</script>
+</body>
+</html>
