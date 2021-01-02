@@ -1,6 +1,6 @@
 // https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/client-class.html
 #include <ESP8266WiFi.h>
-
+ 
 #ifndef STASSID
 #define STASSID ""
 #define STAPSK  ""
