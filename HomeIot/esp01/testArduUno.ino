@@ -1,3 +1,5 @@
+#define CHECKCONNECTION 10000
+
 struct serialData{
     int stringComplete;
     int stringCounter;
@@ -16,9 +18,19 @@ void setup() {
 void loop() {
     struct serialData data = {0, 0, ""};
     int error = 0;
+    // Set timer to check connection ETC
+    unsigned long interval, lastInterval = 0;
     while (error == 0){
-      receiveSerial(&data);
-      sendData(&data);
+        interval = millis();
+        receiveSerial(&data);
+        sendData(&data);
+
+
+        
+        if ((interval - lastInterval) > CHECKCONNECTION){
+            lastInterval = interval;
+            Serial.println("Check");
+        }
     }
 }
 
@@ -43,3 +55,4 @@ void sendData(struct serialData * data){
         Serial.println(data->receivedString);
     }
 }
+

@@ -21,7 +21,6 @@ const uint16_t port = 1112;
 void receive(struct serialData * data);
 
 void setup() {
-  
     Serial.begin(115200);
     Serial.print("Connecting to ");
     Serial.println(ssid);
@@ -47,21 +46,23 @@ void loop() {
         delay(5000);
         return;
     }
-
+    
+    // Main loop
     while (error == 0){
         receive(&data);
-        if (data.stringComplete == 1) {
-            data.stringComplete = 0;
-            data.stringCounter = 0;
-            Serial.println("Received data:");
-            Serial.println(data.receivedString);
-            if (client.connected()){
+        if (client.connected()){
+            if (data.stringComplete == 1) {
+                data.stringComplete = 0;
+                data.stringCounter = 0;
+                Serial.println("Received data:");
+                Serial.println(data.receivedString);
                 Serial.println("SENDING");
                 client.print(data.receivedString);
             }
-            else{
-                Serial.println("Client not connected");
-            }
+        }
+        else{
+            error = 1;
+            Serial.println("Error");
         }
     }
 }
