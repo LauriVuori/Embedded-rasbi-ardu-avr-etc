@@ -16,8 +16,7 @@ const char* password = STAPSK;
 const char* host = "192.168.0.101";
 const uint16_t port = 1112;
 
-const int ledpin = 2;
-const int button = 0;
+
 
 void setup() {
   
@@ -41,7 +40,6 @@ void setup() {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-  pinMode(ledpin, OUTPUT);
 }
 
 void loop() {
@@ -68,10 +66,6 @@ void loop() {
     if (client.connected()){
       Serial.println("SENDING");
       client.println("hello from ESP8266");
-      digitalWrite(ledpin, HIGH);
-      delay(1000);
-      digitalWrite(ledpin, LOW);
-      delay(1000);
     }
     else{
         Serial.println("Client not connected");

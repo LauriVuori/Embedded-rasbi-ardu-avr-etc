@@ -16,32 +16,33 @@ const char* password = STAPSK;
 const char* host = "192.168.0.101";
 const uint16_t port = 1112;
 
-const int ledpin = 2;
-const int button = 0;
 
+bool stringComplete = false;
+char test[15];
+int b = 0;
 void setup() {
   
-  Serial.begin(115200);
-  // pinMode(button, INPUT);
-  // We start by connecting to a WiFi network
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+    Serial.begin(115200);
+    // pinMode(button, INPUT);
+    // We start by connecting to a WiFi network
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
 
-  /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
-     would try to act as both a client and an access-point and could cause
-     network-issues with your other WiFi-devices on your WiFi-network. */
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+    /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
+        would try to act as both a client and an access-point and could cause
+        network-issues with your other WiFi-devices on your WiFi-network. */
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
 
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-  pinMode(ledpin, OUTPUT);
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    pinMode(ledpin, OUTPUT);
 }
 
 void loop() {
@@ -53,28 +54,25 @@ void loop() {
   Serial.println(port);
 
   // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  if (!client.connect(host, port)) {
-    Serial.println("connection failed");
-    delay(5000);
-    return;
-  }
+    WiFiClient client;
+    if (!client.connect(host, port)) {
+        Serial.println("connection failed");
+        delay(5000);
+        return;
+    }
   int val = 0;
   while(true){
-    // This will send a string to the server
-    Serial.println("sending data to server");
-    // int val = digitalRead(button);
-    // if ((client.connected()) && (val == 1))  {
-    if (client.connected()){
-      Serial.println("SENDING");
-      client.println("hello from ESP8266");
-      digitalWrite(ledpin, HIGH);
-      delay(1000);
-      digitalWrite(ledpin, LOW);
-      delay(1000);
-    }
-    else{
-        Serial.println("Client not connected");
+    if (stringComplete) {
+      stringComplete = false;
+      Serial.println("STRING::");
+      if (client.connected()){
+        Serial.println("SENDING");
+        client.println(test);
+      }
+      else{
+          Serial.println("Client not connected");
+      }
+      b = 0;
     }
   }
   
@@ -107,4 +105,18 @@ void loop() {
     delay(300000); // execute once every 5 minutes, don't flood remote service
   }
   wait = true;
+}
+
+
+void serialEvent() {
+  while (Serial.available()) {
+    // get the new byte:
+    char inChar = (char)Serial.read();
+    test[b] = inChar;
+    b++;
+    if (inChar == '\n') {
+      test[b] = '\0';
+      stringComplete = true;
+    }
+  }
 }
