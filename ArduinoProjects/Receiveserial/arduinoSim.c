@@ -14,7 +14,8 @@ void setup() {
 
 void loop() {
 	struct serialData data = {0, 0, ""};
-    while (true){
+    int error = 0;
+    while (error == 0){
 	    receive(&data);
         if (data.stringComplete == 1) {
             data.stringComplete = 0;
