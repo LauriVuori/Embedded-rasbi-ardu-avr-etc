@@ -1,9 +1,7 @@
-char test[15];
-int b = 0;
-bool stringComplete = false;
 struct serialData{
 	int stringComplete;
     int stringCounter;
+    char receivedString[64];
 };
 
 void receive(struct serialData * data);
@@ -15,15 +13,14 @@ void setup() {
 }
 
 void loop() {
-	struct serialData data = {0, 0};
+	struct serialData data = {0, 0, ""};
     while (true){
 	    receive(&data);
         if (data.stringComplete == 1) {
             data.stringComplete = 0;
             data.stringCounter = 0;
-            stringComplete = false;
-            Serial.println("STRING::");
-            Serial.println(test);
+            Serial.println("Received data:");
+            Serial.println(data.receivedString);
         }
     }
 }
@@ -38,12 +35,11 @@ void receive(struct serialData * data) {
 	while (Serial.available()) {
 		// get the new byte:
 		char inChar = (char)Serial.read();
-		test[data->stringCounter] = inChar;
+		data->receivedString[data->stringCounter] = inChar;
 		data->stringCounter++;
-		if (inChar == '\n') {
-			test[data->stringCounter] = '\0';
+		if ((inChar == '\n') || (data->stringCounter == 63)) {
+			data->receivedString[data->stringCounter] = '\0';
 			data->stringComplete = 1;
-			// stringComplete = true;
 		}
 	}
 }
