@@ -1,10 +1,11 @@
 #define CHECKCONNECTION 10000
 
-struct serialData{
+struct serialData {
     int stringComplete;
     int stringCounter;
     char receivedString[64];
 };
+
 
 void receiveSerial(struct serialData * data);
 void sendData(struct serialData * data);
@@ -21,12 +22,13 @@ void loop() {
     // Set timer to check connection ETC
     unsigned long interval, lastInterval = 0;
     while (error == 0){
+        // Main
         interval = millis();
         receiveSerial(&data);
         sendData(&data);
 
 
-        
+        // error checking
         if ((interval - lastInterval) > CHECKCONNECTION){
             lastInterval = interval;
             Serial.println("Check");
@@ -40,7 +42,7 @@ void receiveSerial(struct serialData * data) {
         char inChar = (char)Serial.read();
         data->receivedString[data->stringCounter] = inChar;
         data->stringCounter++;
-        if ((inChar == '\n') || (data->stringCounter == 63)) {
+        if ((inChar == '\n') || (data->stringCounter >= 63)) {
             data->receivedString[data->stringCounter] = '\0';
             data->stringComplete = 1;
         }
