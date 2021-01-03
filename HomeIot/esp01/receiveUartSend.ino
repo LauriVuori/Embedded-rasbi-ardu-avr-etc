@@ -6,6 +6,8 @@
 #define STAPSK  ""
 #endif
 
+#define CHECKCONNECTION 10000
+
 struct serialData{
     int stringComplete;
     int stringCounter;
@@ -18,7 +20,8 @@ const char* password = STAPSK;
 const char* host = "192.168.0.104";
 const uint16_t port = 1112;
 
-void receive(struct serialData * data);
+void receiveSerial(struct serialData * data);
+void sendData(struct serialData * data, WiFiClient * client);
 
 void setup() {
     Serial.begin(115200);
@@ -41,41 +44,54 @@ void loop() {
     WiFiClient client;
     struct serialData data = {0, 0, ""};
     int error = 0;
+    unsigned long interval, lastInterval = 0;
+
     if (!client.connect(host, port)) {
         Serial.println("connection failed");
         delay(5000);
-        return;
     }
-    
-    // Main loop
+
     while (error == 0){
-        receive(&data);
-        if (client.connected()){
-            if (data.stringComplete == 1) {
-                data.stringComplete = 0;
-                data.stringCounter = 0;
-                Serial.println("Received data:");
-                Serial.println(data.receivedString);
-                Serial.println("SENDING");
-                client.print(data.receivedString);
+        // Main
+        interval = millis();
+        receiveSerial(&data);
+        sendData(&data, &client);
+
+
+
+        // error checking
+        if ((interval - lastInterval) > CHECKCONNECTION){
+            lastInterval = interval;
+            // If connection is failed
+            while (client.connected() == false){
+                if (!client.connect(host, port)) {
+                    Serial.println("Reconnecting");
+                    delay(5000);
+                }
             }
-        }
-        else{
-            error = 1;
-            Serial.println("Error");
         }
     }
 }
 
-void receive(struct serialData * data) {
+void receiveSerial(struct serialData * data) {
     while (Serial.available()) {
         // get the new byte:
         char inChar = (char)Serial.read();
         data->receivedString[data->stringCounter] = inChar;
         data->stringCounter++;
-        if ((inChar == '\n') || (data->stringCounter == 63)) {
+        if ((inChar == '\n') || (data->stringCounter >= 63)) {
             data->receivedString[data->stringCounter] = '\0';
             data->stringComplete = 1;
         }
+    }
+}
+
+void sendData(struct serialData * data, WiFiClient * client){
+    if (data->stringComplete == 1) {
+        data->stringComplete = 0;
+        data->stringCounter = 0;
+        Serial.println("Received data:");
+        Serial.println(data->receivedString);
+        client->print(data->receivedString);
     }
 }
