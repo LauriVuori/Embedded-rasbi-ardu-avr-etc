@@ -5,9 +5,7 @@
 #include <sys/socket.h> 
 #define MAX 80 
 #define PORT 8080 
-#define IP "127.0.0.1"
-#define SA struct sockaddr
-
+#define SA struct sockaddr 
 void func(int sockfd) 
 { 
     char buff[MAX]; 
@@ -46,7 +44,7 @@ int main()
   
     // assign IP, PORT 
     servaddr.sin_family = AF_INET; 
-    servaddr.sin_addr.s_addr = inet_addr(IP); 
+    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
     servaddr.sin_port = htons(PORT); 
   
     // connect the client socket to server socket 
