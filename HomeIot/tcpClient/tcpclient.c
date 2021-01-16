@@ -58,7 +58,7 @@ int main()
         printf("connected to the server..\n"); 
   
     // function for chat 
-    func(sockfd); 
+    // func(sockfd); 
   
     // close the socket 
     close(sockfd); 
