@@ -20,8 +20,8 @@ void func(int sockfd)
             ; 
         write(sockfd, buff, sizeof(buff)); 
         bzero(buff, sizeof(buff)); 
-        read(sockfd, buff, sizeof(buff)); 
-        printf("From Server : %s", buff); 
+        // read(sockfd, buff, sizeof(buff)); 
+        // printf("From Server : %s", buff); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
             printf("Client Exit...\n"); 
             break; 
@@ -58,7 +58,7 @@ int main()
         printf("connected to the server..\n"); 
   
     // function for chat 
-    // func(sockfd); 
+    func(sockfd); 
   
     // close the socket 
     close(sockfd); 
