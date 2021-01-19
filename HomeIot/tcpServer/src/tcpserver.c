@@ -23,16 +23,29 @@
 //    unsigned char        sin_zero[8];
 // };
 
+
+
 int main() {
     // @param sockfd − It is a socket descriptor returned by the socket function.
     // @param cliaddr − It is a pointer to struct sockaddr that contains client IP address and port.
-    int sockfd, connfd, len; 
-    int accClient;
-    struct sockaddr_in servaddr, client; 
+    // @param connfd − 
+    int sockfd, len; 
+    int acceptedClient;
+    struct sockaddr_in servaddr, client;
+    struct errors error = {0};
 
     initSocket(&servaddr, &sockfd);
-    acceptClient(&client, &sockfd, &connfd);
-    // func(connfd);
+    acceptClient(&client, &sockfd, &acceptedClient);
+    receiveData(&acceptedClient, &error);
+
+    // Get errors and listen new connections
+    if (error.zeroBuffer == 1) {
+        printf("\nFOUND ERROR, TRYING TO GET CONNECTION BACK\n");
+        acceptClient(&client, &sockfd, &acceptedClient);
+        error.zeroBuffer = 0;
+    }
+    receiveData(&acceptedClient, &error);
+    // func(&acceptedClient);
     close(sockfd); 
 }
 
@@ -83,7 +96,30 @@ void initSocket(struct sockaddr_in * servAddr, int * sockfd) {
     }
 }
 
-void func(int sockfd) { 
+void receiveData(int * sockfd, struct errors * error) {
+    char buff[MAX];
+    int n;
+    printf("Receiving data:\n");
+    while (((strncmp("exit", buff, 4)) != 0) && (error->zeroBuffer == 0)){
+        bzero(buff, MAX);
+        // read the message from client and copy it in buffer 
+        // int read(int fildes, const void *buf, int nbyte);
+        read(*sockfd, buff, sizeof(buff));
+        if(buff[0] == '\0') {
+            // in case of connection lost etc..
+            error->zeroBuffer = 1;
+            printf("Got empty buffer, maybe lost connection\n");
+        }
+        else{
+            printf("From client: %s\n", buff);
+        }
+    }
+    printf("Communication ends..\n");
+}
+
+
+
+void func(int *sockfd) { 
     char buff[MAX]; 
     int n; 
     // infinite loop for chat 
@@ -91,7 +127,7 @@ void func(int sockfd) {
         bzero(buff, MAX); 
   
         // read the message from client and copy it in buffer 
-        read(sockfd, buff, sizeof(buff)); 
+        read(*sockfd, buff, sizeof(buff)); 
         // print buffer which contains the client contents 
         printf("From client: %s\t To client : ", buff); 
         bzero(buff, MAX); 
