@@ -33,19 +33,24 @@ int main() {
     int acceptedClient;
     struct sockaddr_in servaddr, client;
     struct errors error = {0};
+    char menu[5];
 
     initSocket(&servaddr, &sockfd);
     acceptClient(&client, &sockfd, &acceptedClient);
     receiveData(&acceptedClient, &error);
-
-    // Get errors and listen new connections
-    if (error.zeroBuffer == 1) {
-        printf("\nFOUND ERROR, TRYING TO GET CONNECTION BACK\n");
-        acceptClient(&client, &sockfd, &acceptedClient);
-        error.zeroBuffer = 0;
+    while (menu != 'e') {
+        // Get errors and listen new connections
+        if (error.zeroBuffer == 1) {
+            printf("\nFOUND ERROR, TRYING TO GET CONNECTION BACK\n");
+            bzero(&client, sizeof(client));
+            acceptClient(&client, &sockfd, &acceptedClient);
+            error.zeroBuffer = 0;
+        }
+        receiveData(&acceptedClient, &error);
+        // func(&acceptedClient);
+        printf("Out of loop: want to continue 'e' to quit\n");
+        fgets(&menu, 2, stdin);
     }
-    receiveData(&acceptedClient, &error);
-    // func(&acceptedClient);
     close(sockfd); 
 }
 
@@ -112,6 +117,9 @@ void receiveData(int * sockfd, struct errors * error) {
         }
         else{
             printf("From client: %s\n", buff);
+        // and send that buffer to client 
+            // write(sockfd, buff, sizeof(buff));
+            // printf("data sent: %s\n", buff);
         }
     }
     printf("Communication ends..\n");
