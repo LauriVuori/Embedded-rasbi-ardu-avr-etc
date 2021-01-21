@@ -25,20 +25,25 @@
 
 
 
-int main() {
+int main(void) {
     // @param sockfd − It is a socket descriptor returned by the socket function.
     // @param cliaddr − It is a pointer to struct sockaddr that contains client IP address and port.
     // @param connfd − 
     int sockfd, len; 
     int acceptedClient;
     struct sockaddr_in servaddr, client;
-    struct errors error = {0};
+    struct tcpErrors error = {0};
+    struct tcpOptions options = {false};
+
+    options.sendDataBack = true;
+
     char menu[5];
 
     initSocket(&servaddr, &sockfd);
     acceptClient(&client, &sockfd, &acceptedClient);
     receiveData(&acceptedClient, &error);
-    while (menu != 'e') {
+
+    while (menu[0] != 'e') {
         // Get errors and listen new connections
         if (error.zeroBuffer == 1) {
             printf("\nFOUND ERROR, TRYING TO GET CONNECTION BACK\n");
@@ -49,9 +54,24 @@ int main() {
         receiveData(&acceptedClient, &error);
         // func(&acceptedClient);
         printf("Out of loop: want to continue 'e' to quit\n");
-        fgets(&menu, 2, stdin);
+        fgets(menu, 2, stdin);
     }
     close(sockfd); 
+}
+/*********************************************************************
+	F U N C T I O N    D E S C R I P T I O N
+----------------------------------------------------------------------*/
+/**
+ * @fn sendData(int * sockfd, char (*data)[MAX])
+ * @brief 
+ * @param asd asd
+ * @return asd
+ * @remark asdsadadsadsasddas
+*/
+/*********************************************************************/
+void sendData(int * sockfd, char (*data)[MAX]) {
+    printf("<%ld>", sizeof(data));
+    write(*sockfd, data, sizeof(data));
 }
 
 void acceptClient(struct sockaddr_in * client, int * sockfd, int * acceptClient) {
@@ -101,25 +121,25 @@ void initSocket(struct sockaddr_in * servAddr, int * sockfd) {
     }
 }
 
-void receiveData(int * sockfd, struct errors * error) {
+void receiveData(int * sockfd, struct tcpErrors * error) {
     char buff[MAX];
     int n;
     printf("Receiving data:\n");
-    while (((strncmp("exit", buff, 4)) != 0) && (error->zeroBuffer == 0)){
+    while (((strncmp("exit", buff, 4)) != 0) && (error->zeroBuffer == false)){
         bzero(buff, MAX);
         // read the message from client and copy it in buffer 
         // int read(int fildes, const void *buf, int nbyte);
         read(*sockfd, buff, sizeof(buff));
         if(buff[0] == '\0') {
             // in case of connection lost etc..
-            error->zeroBuffer = 1;
+            error->zeroBuffer = true;
             printf("Got empty buffer, maybe lost connection\n");
         }
         else{
             printf("From client: %s\n", buff);
-        // and send that buffer to client 
-            // write(sockfd, buff, sizeof(buff));
-            // printf("data sent: %s\n", buff);
+            
+            // sendData(sockfd, buff);
+            write(*sockfd, buff, sizeof(buff));
         }
     }
     printf("Communication ends..\n");
