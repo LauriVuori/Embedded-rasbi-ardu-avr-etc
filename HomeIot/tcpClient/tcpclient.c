@@ -14,14 +14,14 @@ void func(int sockfd)
     int n; 
     for (;;) { 
         bzero(buff, sizeof(buff)); 
-        printf("Enter the string : "); 
+        printf("Enter the string :"); 
         n = 0; 
-        while ((buff[n++] = getchar()) != '\n') 
-            ; 
+        fgets(buff, 80, stdin);
         write(sockfd, buff, sizeof(buff)); 
         bzero(buff, sizeof(buff)); 
-        // read(sockfd, buff, sizeof(buff)); 
-        // printf("From Server : %s", buff); 
+        
+        read(sockfd, buff, sizeof(buff)); 
+        printf("From Server : %s", buff); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
             printf("Client Exit...\n"); 
             break; 
