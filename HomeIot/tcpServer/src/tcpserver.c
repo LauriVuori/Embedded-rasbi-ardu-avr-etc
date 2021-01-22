@@ -8,10 +8,7 @@
 #include <sys/socket.h> 
 #include <sys/types.h>
 #include <../include/tcp.h>
-#define MAX 80 
-#define PORT 8080
-#define MAXCONNECTIONS 1
-#define SA struct sockaddr
+
 // struct sockaddr {
 //    unsigned short   sa_family;
 //    char             sa_data[14];
@@ -32,29 +29,29 @@ int main(void) {
     int sockfd, len; 
     int acceptedClient;
     struct sockaddr_in servaddr, client;
-    struct tcpErrors error = {0};
+    struct tcpErrors error = {false};
     struct tcpOptions options = {false};
 
-    options.sendDataBack = true;
 
     char menu[5];
 
     initSocket(&servaddr, &sockfd);
     acceptClient(&client, &sockfd, &acceptedClient);
-    receiveData(&acceptedClient, &error);
 
+    // Ask this
+    options.sendDataBack = true;
     while (menu[0] != 'e') {
+        receiveData(&acceptedClient, &error, &options);
         // Get errors and listen new connections
+        // func(&acceptedClient);
+        printf("Out of loop: want to continue 'e' to quit\n");
+        fgets(menu, 2, stdin);
         if (error.zeroBuffer == 1) {
             printf("\nFOUND ERROR, TRYING TO GET CONNECTION BACK\n");
             bzero(&client, sizeof(client));
             acceptClient(&client, &sockfd, &acceptedClient);
             error.zeroBuffer = 0;
         }
-        receiveData(&acceptedClient, &error);
-        // func(&acceptedClient);
-        printf("Out of loop: want to continue 'e' to quit\n");
-        fgets(menu, 2, stdin);
     }
     close(sockfd); 
 }
@@ -63,17 +60,28 @@ int main(void) {
 ----------------------------------------------------------------------*/
 /**
  * @fn sendData(int * sockfd, char (*data)[MAX])
- * @brief 
- * @param asd asd
- * @return asd
- * @remark asdsadadsadsasddas
+ * @brief send data to target address 
+ * @param char(*data)[MAX]
+ * @return writes to target destination
+ * @remark char (*data)[MAX] is this correct way to do
 */
 /*********************************************************************/
 void sendData(int * sockfd, char (*data)[MAX]) {
-    printf("<%ld>", sizeof(data));
-    write(*sockfd, data, sizeof(data));
+    write(*sockfd, *data, sizeof(*data));
 }
 
+/*********************************************************************
+	F U N C T I O N    D E S C R I P T I O N
+----------------------------------------------------------------------*/
+/**
+ * @fn acceptClient(struct sockaddr_in * client, int * sockfd, int * acceptClient)
+ * @brief 
+ * @param struct sockaddr_in* client
+ * @param int* sockfd
+ * @param int* acceptClient
+ * @return writes to target destination
+*/
+/*********************************************************************/
 void acceptClient(struct sockaddr_in * client, int * sockfd, int * acceptClient) {
     int len = 0;
     /* int listen(int sockfd,int backlog);
@@ -97,6 +105,18 @@ void acceptClient(struct sockaddr_in * client, int * sockfd, int * acceptClient)
     }
 }
 
+
+/*********************************************************************
+	F U N C T I O N    D E S C R I P T I O N
+----------------------------------------------------------------------*/
+/**
+ * @fn initSocket(struct sockaddr_in * servAddr, int * sockfd)
+ * @brief initialize socket
+ * @param struct sockaddr_in * servAddr
+ * @param int* sockfd
+ * @return 
+*/
+/*********************************************************************/
 void initSocket(struct sockaddr_in * servAddr, int * sockfd) {
     *sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -121,7 +141,18 @@ void initSocket(struct sockaddr_in * servAddr, int * sockfd) {
     }
 }
 
-void receiveData(int * sockfd, struct tcpErrors * error) {
+/*********************************************************************
+	F U N C T I O N    D E S C R I P T I O N
+----------------------------------------------------------------------*/
+/**
+ * @fn receiveData(int * sockfd, struct tcpErrors * error, struct tcpOptions * options)
+ * @brief Receive data from socket until error, set option to send data back to sender
+ * @param int* sockfd
+ * @param struct tcpErrors * error
+ * @return 
+*/
+/*********************************************************************/
+void receiveData(int * sockfd, struct tcpErrors * error, struct tcpOptions * options) {
     char buff[MAX];
     int n;
     printf("Receiving data:\n");
@@ -137,9 +168,9 @@ void receiveData(int * sockfd, struct tcpErrors * error) {
         }
         else{
             printf("From client: %s\n", buff);
-            
-            // sendData(sockfd, buff);
-            write(*sockfd, buff, sizeof(buff));
+            if (options->sendDataBack == true) {
+                sendData(sockfd, &buff);
+            }
         }
     }
     printf("Communication ends..\n");
