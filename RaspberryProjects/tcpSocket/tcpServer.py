@@ -4,7 +4,7 @@ from time  import sleep
 
 
 HOST = ''
-PORT = 1111
+PORT = 1112
 ADDR = (HOST, PORT)
 BUFSIZE = 4096
 
@@ -33,7 +33,7 @@ while True:
     print(data)
     sleep(0.5)
     decoded = data.decode('utf-8')
-    if (decoded == "quit"):
+    if (decoded == "quit\n"):
         print("Shutdown")
         conn.close()
         break
