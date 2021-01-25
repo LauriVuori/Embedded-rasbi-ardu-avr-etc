@@ -40,6 +40,10 @@ int main(void) {
 
     // Ask this
     options.sendDataBack = true;
+    // child process???
+    // int pid = 0;
+    // pid = fork();
+    // printf("%d", pid);
     while (menu[0] != 'e') {
         receiveData(&acceptedClient, &error, &options);
         // Get errors and listen new connections
@@ -55,6 +59,21 @@ int main(void) {
     }
     close(sockfd); 
 }
+
+/*********************************************************************
+	F U N C T I O N    D E S C R I P T I O N
+----------------------------------------------------------------------*/
+/**
+ * @fn s
+ * @brief 
+ * @param 
+ * @return 
+*/
+/*********************************************************************/
+void acceptMultipleConnections(){
+    int i = 0;
+}
+
 /*********************************************************************
 	F U N C T I O N    D E S C R I P T I O N
 ----------------------------------------------------------------------*/
