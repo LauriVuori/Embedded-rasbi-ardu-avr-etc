@@ -41,10 +41,15 @@ int main (void)
 				}
 			}
 			else if (counter == 8) {
+				result = 0x00;
+				if (output >= 0xff) {
+					result = 0x01;
+				}
 			shifted = output >> 5;
-			result = 0x01;
-			for (int i = 1; i <= shifted; i++) {
-				result = result | 0x01<< i;
+		
+			for (int i = 0; i < shifted; i++) {
+				// result = result | 0x01 << i;
+				result = result << 1 | 0x01;
 			}
 
 			PORTB = ~result;
