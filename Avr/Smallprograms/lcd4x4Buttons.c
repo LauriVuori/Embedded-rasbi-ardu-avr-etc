@@ -28,17 +28,6 @@ int main(void) {
 		button = luenappi();
 		wait(20);
 		drawing(button, &currentRow, &currentCol);
-		// if (currentCol > 15) {
-		// 	currentCol = 0;
-		// }
-		// if (button != 0) {
-		// 	if ((button < 10) && (currentCol < 16)) {
-		// 		LCD_WriteUINT(button);
-		// 		LCD_SetCursorXY(currentRow, currentCol);
-		// 		currentCol++;
-		// 	}
-		// }
-		// LCD_WriteUINT(PIND);
 		wait (100);
 	}
 }
@@ -94,7 +83,7 @@ void drawing(uint8_t button, uint8_t * currentRow, uint8_t * currentCol) {
 unsigned char luenappi() {
 	unsigned char a=0x00;
 
-	PORTD = ~0x10; // 1110 1111
+	PORTD = ~0x10; // 0110 1111
 	wait(10);
 	if (~PIND & 0x01) a = 1;
 	if (~PIND & 0x02) a = 2;

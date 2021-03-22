@@ -14,6 +14,7 @@
 // tulos		0000 0100 tosi koska poikkeaa nollasta
 // PD2 upper button
 // PD3 lower button
+
 void init_leds(){
 	DDRB=0xFF; //suuntarekisteri ja suunta ulos
 	PORTB=0xff; //B-port 1111 1111 leds off
@@ -21,6 +22,7 @@ void init_leds(){
 	PORTD=0xff; //D-porttiin
 
 }
+
 void init_pwm(){
 	DDRB   |= (1 << PB2);                   // PWM output on PB2
 	TCCR0A = (1 << COM0A1) | (1 << WGM00);  // phase correct PWM mode
