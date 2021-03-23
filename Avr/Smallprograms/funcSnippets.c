@@ -1,3 +1,9 @@
+#include <avr/io.h>
+#define F_CPU 20000000UL
+#include <util/delay.h>
+
+
+
 //	PIND		1111 1111
 
 //Tilanne jos nappia ei painettu
@@ -14,7 +20,21 @@
 // tulos		0000 0100 tosi koska poikkeaa nollasta
 // PD2 upper button
 // PD3 lower button
-
+/*********************************************************************
+	F U N C T I O N    D E S C R I P T I O N
+---------------------------------------------------------------------
+ NAME: init_leds
+ DESCRIPTION: init port b output, port d pin 6=pd2 and 7= pd3
+	Input: 
+	Output:
+  Used global variables:
+  Used global constants:
+ REMARKS when using this function: example else 
+ if(~PIND & (1<<PD3)) {
+		_delay_ms(20);
+		PORTB=0x0f;
+ }
+*********************************************************************/
 void init_leds(){
 	DDRB=0xFF; //suuntarekisteri ja suunta ulos
 	PORTB=0xff; //B-port 1111 1111 leds off
