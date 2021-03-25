@@ -10,7 +10,7 @@ void Taski(void);
 volatile uint8_t lippu = 0;
 
 void wait(uint16_t time);
-	uint8_t test = 0x0f;
+uint8_t test = 0x0f;
 int main(void) {
 	DDRB = 0xFF;
 	
@@ -21,20 +21,23 @@ int main(void) {
 	// laskeva reuna (PD.2) generoi keskeytyksen
 	sei(); // globaali keskeytysten sallinta
 	while (1) {
-		Taski();
-		//PORTB = ~test;
-		PORTB = test;
-		wait(50);
-		PORTB = 0x00;
-		wait(50);
+		while(~PIND & (1<<PD2)){
+			Taski();
+			//PORTB = ~test;
+			PORTB = test;
+			wait(50);
+			PORTB = 0xFF;
+			wait(50);
+		}
+		PORTB = 0xFF;
 	}
 }
 
 void wait(uint16_t time) {
 	volatile uint16_t i;
 	for(i=0;i<2000;i++) {
-	     _delay_loop_2(time);
-	 }
+		_delay_loop_2(time);
+	}
 }
 ISR(INT0_vect) { // Ulkoinen keskeytys INT0
 	lippu = TOSI;
