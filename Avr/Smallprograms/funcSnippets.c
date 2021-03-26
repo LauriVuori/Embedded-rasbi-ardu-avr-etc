@@ -51,6 +51,22 @@ void init_pwm(){
 	TCCR0B = (1 << CS01);   // clock source = CLK/8, start PWM
 }
 
+// if (TCNT1 >= 65535) {
+//             PORTB = 
+//             TCNT1 = 0; // reset timer
+// }
+void use8Timer() {
+	TCCR1B |= (1 << CS11); // clk/8
+}
+void use64Timer() {
+    TCCR1B = (1 << CS11) | (1 << CS10);  // clk/64
+}
+void use256Timer() {
+    TCCR1B |= (1 << CS12); // clk/256
+}
+void use1024Timer() {
+    TCCR1B = (1 << CS10) | (1 << CS12);  // clk/1024
+}
 
 
 void test(){
