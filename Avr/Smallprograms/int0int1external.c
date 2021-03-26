@@ -1,4 +1,4 @@
-#define F_CPU 20000000UL
+#define F_CPU 10000000UL
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h> // keskeytyskirjasto
