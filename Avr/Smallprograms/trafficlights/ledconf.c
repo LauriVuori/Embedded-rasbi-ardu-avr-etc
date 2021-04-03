@@ -24,28 +24,19 @@
 
 //walker push button
 #define TKWBUTD 0x10 //pa 4
-
 //car push button
 #define TKCBUTB 0x01
-// void init_buttons(){
 
-// }
-void init_leds(){
-	DDRB = 0xFF ^ TKCBUTB;
-	DDRD = 0xFF ^ (TTCBUTD | TKWBUTD | TTWBUTD) ;
-	turnOffLeds();
-}
-
-void turnOffLeds() {
-	PORTB = 0x00 | (TKCBUTB);
-	PORTD = 0x00 | (TTCBUTD | TKWBUTD | TTWBUTD);
-	_delay_ms(20);
-}
+volatile uint8_t time = 0;
+void Timer_init(void);
+void init_leds(void);
+void turnOffLeds(void);
 
 #define DELAY 200
 int main(void) {
 
 	init_leds();
+    Timer_init();
 	
 	while (1) {
 		while (~PINB & TKCBUTB) {
@@ -87,4 +78,32 @@ int main(void) {
 	}
 }
 
+ISR(TIMER1_OVF_vect) {
+	time ++;
+    TCNT1 = 200;
+}
 
+void Timer_init(void) {
+	// timer start, jakoluku CLK/64
+	// TCCR1B |= (1<<CS11) | (1<<CS10); // cs12, cs 11, cs 10 = tccr1b
+	
+	TCCR1B |= (1 << CS10); // 256 10mHz/ 256 = 39062.5
+	TIMSK |= 1 << TOIE1;
+	TCNT1 = 200;
+	//TCCR0 = 4;
+	// TOIE1, timer1 overflow interrupt enable
+}
+
+
+void turnOffLeds() {
+	PORTB = 0x00 | (TKCBUTB);
+	PORTD = 0x00 | (TTCBUTD | TKWBUTD | TTWBUTD);
+	_delay_ms(20);
+}
+
+
+void init_leds(){
+	DDRB = 0xFF ^ TKCBUTB;
+	DDRD = 0xFF ^ (TTCBUTD | TKWBUTD | TTWBUTD) ;
+	turnOffLeds();
+}
