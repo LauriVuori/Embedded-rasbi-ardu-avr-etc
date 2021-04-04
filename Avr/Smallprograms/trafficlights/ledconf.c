@@ -29,78 +29,107 @@
 #define TKCBUTB 0x01
 
 
-#define FLAGS 4
+#define FLAGS 6
 #define CARTKFLAG 0
 #define CARTTFLAG 1
 #define WALTKFLAG 2
 #define WALTTFLAG 3
+#define NOTRAFFIC 4
+#define TRAFFICDELAY 50
 
 
-
-uint8_t buttonFlags[FLAGS] = {0};
+volatile uint8_t noTrafficTimer = 0;
+volatile uint8_t buttonFlags[FLAGS] = {0};
 volatile uint8_t time = 0;
 void Timer_init(void);
 void init_leds(void);
 void turnOffLeds(void);
 void checkButtons(void);
 void test(void);
+void wait52ms (uint8_t wait);
+void checkTraffic(void);
 #define DELAY 200
 int main(void) {
 
 	init_leds();
 	Timer_init();
-	
+	// uint8_t startTime = 0;
+	// startTime = time;
+	// for (int i = 0; i <= wait; i++) {
+	//     i = time-startTime;
+	// }
+
 	while (1) {
-        test();
+		test();
+		// if (time - noTrafficTimer >= 100) {
+	}
+}
+
+
+void wait52ms (uint8_t wait) {
+	uint8_t difference = 0;
+	uint8_t starttime = time;
+	while (difference <= wait){
+		difference = time-starttime;
 	}
 }
 
 void test(void) {
-    if (buttonFlags[CARTKFLAG] == 1) {
-        PORTB |= TKCREDB;
-        _delay_ms(DELAY);
-        PORTB ^= TKCREDB;
-        PORTB |= TKCYELB;
-        _delay_ms(DELAY);
-        PORTB ^= TKCYELB;
-        PORTB |= TKCGREB;
-        _delay_ms(DELAY);
-        PORTB ^= TKCGREB;
-        _delay_ms(DELAY);
-        buttonFlags[CARTKFLAG] = 0;
-    }
-    if (buttonFlags[CARTTFLAG] == 1) {
-        PORTD |= TTCREDD;
-        _delay_ms(DELAY);
-        PORTD ^= TTCREDD;
-        PORTD |= TTCYELD;
-        _delay_ms(DELAY);
-        PORTD ^= TTCYELD;
-        PORTD |= TTCGRED;
-        _delay_ms(DELAY);
-        PORTD ^= TTCGRED;
-        buttonFlags[CARTTFLAG] = 0;
-    }
+	if (buttonFlags[CARTKFLAG] == 1) {
+		PORTB |= TKCREDB;
+		//_delay_ms(DELAY);
+		wait52ms(20);
+		PORTB ^= TKCREDB;
+		PORTB |= TKCYELB;
+		// _delay_ms(DELAY);
+		wait52ms(20);
+		PORTB ^= TKCYELB;
+		PORTB |= TKCGREB;
+		// _delay_ms(DELAY);
+		wait52ms(20);
+		PORTB ^= TKCGREB;
+		// _delay_ms(DELAY);
+		buttonFlags[CARTKFLAG] = 0;
+	}
+	if (buttonFlags[CARTTFLAG] == 1) {
+		PORTD |= TTCREDD;
+		_delay_ms(DELAY);
+		PORTD ^= TTCREDD;
+		PORTD |= TTCYELD;
+		_delay_ms(DELAY);
+		PORTD ^= TTCYELD;
+		PORTD |= TTCGRED;
+		_delay_ms(DELAY);
+		PORTD ^= TTCGRED;
+		buttonFlags[CARTTFLAG] = 0;
+	}
 
-    if (buttonFlags[WALTKFLAG] == 1) {
-        PORTD |= TKWREDD;
-        _delay_ms(DELAY);
-        PORTD ^= TKWREDD;
-        PORTB |= TKWGREB;
-        _delay_ms(DELAY);
-        PORTB ^= TKWGREB;
-        buttonFlags[WALTKFLAG] = 0;
-    }
-    if (buttonFlags[WALTTFLAG] == 1) {
-        PORTB |= TTWREDB;
-        _delay_ms(DELAY);
-        PORTB ^= TTWREDB;
-        PORTB |= TTWGREB;
-        _delay_ms(DELAY);
-        PORTB ^= TTWGREB;
-        buttonFlags[WALTTFLAG] = 0;
-    }
-	//turnOffLeds();
+	if (buttonFlags[WALTKFLAG] == 1) {
+		PORTD |= TKWREDD;
+		_delay_ms(DELAY);
+		PORTD ^= TKWREDD;
+		PORTB |= TKWGREB;
+		_delay_ms(DELAY);
+		PORTB ^= TKWGREB;
+		buttonFlags[WALTKFLAG] = 0;
+	}
+	if (buttonFlags[WALTTFLAG] == 1) {
+		PORTB |= TTWREDB;
+		_delay_ms(DELAY);
+		PORTB ^= TTWREDB;
+		PORTB |= TTWGREB;
+		_delay_ms(DELAY);
+		PORTB ^= TTWGREB;
+		buttonFlags[WALTTFLAG] = 0;
+	}
+	if (buttonFlags[NOTRAFFIC] == 1){
+		PORTB |= TKCYELB;
+		PORTD |= TTCYELD;
+		wait52ms(10);
+		PORTB ^= TKCYELB;
+		PORTD ^= TTCYELD;
+		wait52ms(10);
+	}
 }
 
 
@@ -110,37 +139,58 @@ void checkButtons() {
 	// CARTKFLAG = 0
 	if (~PINB & TKCBUTB) {
 		buttonFlags[CARTKFLAG] = 1;
+		buttonFlags[NOTRAFFIC] = 0;
+		noTrafficTimer = 0;
 	}
 	// CARTTFLAG = 1
 	if (~PIND & TTCBUTD) {
 		buttonFlags[CARTTFLAG] = 1;
+		buttonFlags[NOTRAFFIC] = 0;
+		noTrafficTimer = 0;
 	}
-    // WALTKFLAG = 2
+	// WALTKFLAG = 2
 	if (~PIND & TKWBUTD) {
-        buttonFlags[WALTKFLAG] = 1;
-    }
-    // TTWBUTD = 3
+		buttonFlags[WALTKFLAG] = 1;
+		buttonFlags[NOTRAFFIC] = 0;
+		noTrafficTimer = 0;
+	}
+	// TTWBUTD = 3
 	if (~PIND & TTWBUTD) {
-        buttonFlags[WALTTFLAG] = 1;
-    }
+		buttonFlags[WALTTFLAG] = 1;
+		buttonFlags[NOTRAFFIC] = 0;
+		noTrafficTimer = 0;
+	}
 	
 }
 
 ISR(TIMER1_OVF_vect) {
 	time ++;
-	TCNT1 = 200;
+	TCNT1 = 4835;
 	checkButtons();
+	checkTraffic();
 }
-
+void checkTraffic(void) {
+	if (buttonFlags[NOTRAFFIC] == 0) {
+		if (noTrafficTimer <= TRAFFICDELAY) {
+			noTrafficTimer++;
+		}
+		else{
+			buttonFlags[NOTRAFFIC] = 1;
+		}
+		
+	}
+	// difference = time - noTrafficTimer;
+}
 void Timer_init(void) {
-	// timer start, jakoluku CLK/64
-	// TCCR1B |= (1<<CS11) | (1<<CS10); // cs12, cs 11, cs 10 = tccr1b
+	// 1 250 000 / 65 535 = 19.073 times in second
+	// start timer on 4835 -> 19 times
+	// 52.63 ms per overflow
 	
-	TCCR1B |= (1 << CS10); // 256 10mHz/ 256 = 39062.5
+	
+	TCCR1B |= (1 << CS11); // 8 10mHz/ 8 = 1 250 000
 	TIMSK |= 1 << TOIE1;
-	TCNT1 = 200;
+	TCNT1 = 4835;
 	sei();
-	//TCCR0 = 4;
 	// TOIE1, timer1 overflow interrupt enable
 }
 
