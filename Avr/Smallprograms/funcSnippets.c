@@ -95,3 +95,15 @@ void test(){
 		
 		PORTB=0xFF;
 }
+
+
+
+// const __flash uint8_t menu[] = {"Print text to lcd\nMenu:\n1)Terve\n2)Moro\n3)Jou\n4)Hei\n5)hello\n\0"};
+// printToTerminalFlash(menu);
+void printToTerminalFlash(const __flash uint8_t * text) {
+	for (int i = 0; *text != '\0'; i++) {
+		//while (!( UCSRA & (1<<UDRE)));
+		//UDR = *text;
+		text++;
+	}
+}
