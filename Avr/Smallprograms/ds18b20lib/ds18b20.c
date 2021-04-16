@@ -1,3 +1,8 @@
+/********************************************************************
+// ** DS1820 Funktiot by Jukka Pitk�nen
+// ** GetTemp-korjaus, Olli-Pekka Korpela
+// ** Further modified by Lauri Vuori (More functionality)
+********************************************************************/
 
 // ds18b20Temp(&PORTD, &DDRD, &PIND, ( 1 << PD5 ));
 #include <avr/io.h>
