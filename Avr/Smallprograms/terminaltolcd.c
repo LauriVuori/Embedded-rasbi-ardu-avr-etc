@@ -2,6 +2,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include "lcd_tat.h"
 // line feed \n
 // carriage return \r
 
@@ -20,36 +21,42 @@ void ledsInit(void);
 // prototypes
 
 //#define MENU "Print text to lcd\nMenu:\n1)Terve\n2)Moro\n3)Jou\n4)Hei\n5)hello\n"
-const __flash uint8_t menu[] = {"Print text to lcd\nMenu:\n1)Terve\n2)Moro\n3)Jou\n4)Hei\n5)hello\n\0"};
+const __flash uint8_t menu[] = {"Print text to lcd\nMenu:\n1)Terve\n2)Moro\n3)Jou\n4)Hei\n5)hello\n6)menu\n\0"};
 
 uint8_t merkki = 'A';
 //uint8_t receivedString[20];
 uint8_t flag = 0;
-// 'uint8_t * {aka unsigned char *}' but argument is of type '__flash const __flash uint8_t (*)[61] {aka __flash const __flash unsigned char (*)[61]}
+
 
 
 int main(void) {
 	USART_Init();
-	ledsInit();
+	LCD_init(1,0,0);
+	_delay_ms(40);
 	sei(); // global interrut ON
-
+	LCD_SetCursorXY(0,0);
+	LCD_Clear();
+	_delay_ms(40);
+	printToTerminalFlash(menu);
 	while(1) {
 		if (flag == 1) {
-			PORTB ^= 0x04;
+			LCD_SetCursorXY(0,0);
+			LCD_Clear();
+			_delay_ms(20);
 			if (merkki == '1') {
-				USART_sendString((uint8_t *)"PRINT1\n");
+				LCD_WriteString("Terve");
 			}
 			if (merkki == '2') {
-				USART_sendString((uint8_t *)"PRINT2\n");
+				LCD_WriteString("Moro");
 			}
 			if (merkki == '3') {
-				USART_sendString((uint8_t *)"PRINT3\n");
+				LCD_WriteString("Jou");
 			}
 			if (merkki == '4') {
-				USART_sendString((uint8_t *)"PRINT4\n");
+				LCD_WriteString("Hei");
 			}
 			if (merkki == '5') {
-				USART_sendString((uint8_t *)"PRINT5\n");
+				LCD_WriteString("hello");
 			}
 			if (merkki == '6') {
 				printToTerminalFlash(menu);
@@ -70,10 +77,7 @@ void printToTerminalFlash(const __flash uint8_t * text) {
 		text++;
 	}
 }
-void ledsInit(void) {
-	DDRB = 0xFF;
-	PORTB = 0x00;
-}
+
 // USART 8N1
 void USART_Init(void) {
 	// USART Baud Rate Registers – UBRRL and UBRRH
@@ -90,15 +94,8 @@ void USART_Init(void) {
 }
 // usart receive interrupt
 ISR(USART0_RX_vect) {
-	merkki = UDR; // lue merkki Datarekisteristä
-	// if (optionReceived == 0) {
-	// 	readString();
-	// }
+	merkki = UDR;
 	flag = 1;
-	PORTB ^= 0x01;
-	// USART_Transmit(merkki); // lähetä merkki
-	// // USART_Transmit(0x0A); // uusi rivi, new line
-	// // USART_Transmit(0x0D); // rivin alkuun, CR, carridge return
 }
 
 void USART_sendString(uint8_t * str) {
