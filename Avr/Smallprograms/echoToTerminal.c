@@ -21,7 +21,7 @@ void ledsInit(void);
 // prototypes
 
 //#define MENU "Print text to lcd\nMenu:\n1)Terve\n2)Moro\n3)Jou\n4)Hei\n5)hello\n"
-const __flash uint8_t menu[] = {"Print text to lcd\nMenu:\n1)Terve\n2)Moro\n3)Jou\n4)Hei\n5)hello\n6)menu\n\0"};
+const __flash uint8_t menu[] = {"Press numbers:\0"};
 
 uint8_t merkki = 'A';
 //uint8_t receivedString[20];
@@ -31,39 +31,19 @@ uint8_t flag = 0;
 // tera term new-line Receive LF Transmit LF
 int main(void) {
 	USART_Init();
-	LCD_init(1,0,0);
-	_delay_ms(40);
 	sei(); // global interrut ON
-	LCD_SetCursorXY(0,0);
-	LCD_Clear();
-	_delay_ms(40);
-	printToTerminalFlash(menu);
+
 	while(1) {
 		if (flag == 1) {
-			LCD_SetCursorXY(0,0);
-			LCD_Clear();
-			_delay_ms(20);
-			if (merkki == '1') {
-				LCD_WriteString("Terve");
+			if ((merkki > '9') || (merkki < '0')) {
+				USART_sendString("Not a number\n");
 			}
-			if (merkki == '2') {
-				LCD_WriteString("Moro");
+			else {
+				USART_sendString("Received:");
+				USART_SendChar(merkki);
+				USART_sendString("\n");
 			}
-			if (merkki == '3') {
-				LCD_WriteString("Jou");
-			}
-			if (merkki == '4') {
-				LCD_WriteString("Hei");
-			}
-			if (merkki == '5') {
-				LCD_WriteString("hello");
-			}
-			if (merkki == '6') {
-				printToTerminalFlash(menu);
-			}
-			if ((merkki > '6') || (merkki < '0')) {
-				printToTerminalFlash(menu);
-			}
+
 			flag = 0;
 		}
 		_delay_ms(200);
