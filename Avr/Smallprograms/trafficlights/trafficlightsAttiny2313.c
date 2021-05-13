@@ -286,8 +286,6 @@ void Timer_init(void) {
 	// 1 250 000 / 65 535 = 19.073 times in second
 	// start timer on 4835 -> 19 times
 	// 52.63 ms per overflow
-	
-	
 	TCCR1B |= (1 << CS11); // 8 10mHz/ 8 = 1 250 000
 	TIMSK |= 1 << TOIE1;
 	TCNT1 = 4835;

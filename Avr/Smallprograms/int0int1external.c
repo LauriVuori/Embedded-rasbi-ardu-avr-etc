@@ -41,7 +41,7 @@ ISR(INT0_vect) { // Ulkoinen keskeytys INT0
 	wait(40);
 }
 
-ISR(INT1_vect) { // Ulkoinen keskeytys INT0
+ISR(INT1_vect) { // Ulkoinen keskeytys INT1
 	lippu = TOSI;
 	wait(40);
     for (int i = 0; i < 5; i++) {

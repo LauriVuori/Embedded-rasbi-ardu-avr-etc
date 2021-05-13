@@ -8,16 +8,14 @@
 void wait(uint16_t time);
 void Taski(void);
 volatile uint8_t lippu = 0;
-
-void wait(uint16_t time);
 uint8_t test = 0x0f;
 int main(void) {
 	DDRB = 0xFF;
 	
-	DDRD &= ~(1<<PD2) | (1 << PD3); // PD.2-port input, kokeile 0xFF
-	PORTD = 0x0F; // D-portin pinnit 'ylös'
-	GIMSK  |= (1<<INT0);
-	MCUCR = 1	<<	ISC01; //MCU General Control Register
+	DDRD |= (1<<PD2) | (1 << PD3); // pd2 ja pd3 käyttöön
+	PORTD = (1<<PD2) | (1 << PD3); 
+	GIMSK  |= (1<<INT0); // general interrupt mask, int 0 käyttöön
+	MCUCR = 1 << ISC01; //MCU General Control Register
 	// laskeva reuna (PD.2) generoi keskeytyksen
 	sei(); // globaali keskeytysten sallinta
 	while (1) {

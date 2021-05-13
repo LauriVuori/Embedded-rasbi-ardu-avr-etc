@@ -1,3 +1,4 @@
+#define F_CPU 10000000UL
 #include <avr/io.h>
 #include <util/delay.h>
 
@@ -21,19 +22,19 @@ void printMenu(void) {
 	LCD_WriteString("Tulosta");
 	LCD_SetCursorXY(0,0);
 	_delay_ms(20);
-	_delay_ms(2000);
+	_delay_ms(1000);
 	LCD_Clear();
 	_delay_ms(20);
 	LCD_WriteString("1)Ylarivi");
 	LCD_SetCursorXY(0,1);
 	_delay_ms(20);
 	LCD_WriteString("2)alarivi");
-	_delay_ms(2000);
+	_delay_ms(1000);
 	LCD_Clear();
 	LCD_SetCursorXY(0,0);
 	_delay_ms(20);
 	LCD_WriteString("3)Molemmat");
-	_delay_ms(2000);
+	_delay_ms(1000);
 	LCD_Clear();
 	_delay_ms(20);
 }
@@ -114,7 +115,7 @@ unsigned char luenappi() {
 		while (~PIND & 0x08){
 			a = 16;
 		}
-	} 
+	}
 	return (a);
 }
 // *** Primitive wait() ***
@@ -125,6 +126,14 @@ void wait(uint16_t time) {
 	_delay_loop_2(time);
 }
 
-void printFlashToLcd(const __flash uint8_t * text) {
-	LCD_WriteString(text);
+
+
+void printToLcdFlash(const __flash uint8_t * szString) {
+	// Writes characters until the null-mark appears
+	while ( *szString )
+	{
+		// Writes a character to the LCD and increments the pointer
+		LCD_WriteChar(*szString++);
+		_delay_ms(5);
+	}
 }

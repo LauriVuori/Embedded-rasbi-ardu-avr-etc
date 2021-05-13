@@ -2,17 +2,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-void Timer_init(void);
-void init_leds(void);
-void turnOffLeds(void);
-void checkButtons(void);
-void test(void);
-void wait52ms (uint8_t wait);
-void checkTraffic(void);
-void yellowLights(void);
-void carttLights(void);
-void cartkLights(void);
-void turnOnReds();
+
 
 //tietotie
 // walker lights
@@ -48,6 +38,17 @@ void turnOnReds();
 #define NOTRAFFIC 4
 #define TRAFFICDELAY 150 // use 200*52 = 10400 ms
 
+void Timer_init(void);
+void init_leds(void);
+void turnOffLeds(void);
+void checkButtons(void);
+void test(void);
+void wait52ms (uint8_t wait);
+void checkTraffic(void);
+void yellowLights(void);
+void carttLights(void);
+void cartkLights(void);
+void turnOnReds();
 
 volatile uint8_t noTrafficTimer = 0;
 volatile uint8_t buttonFlags[FLAGS] = {0};
@@ -63,10 +64,10 @@ int main(void) {
 	// for (int i = 0; i <= wait; i++) {
 	//     i = time-startTime;
 	// }
-    cartkLights();
-    carttLights();
-    waltkLights();
-    walttLights();
+    // cartkLights();
+    // carttLights();
+    // waltkLights();
+    // walttLights();
 	while (1) {
         if (buttonFlags[CARTKFLAG] == 1) {
             cartkLights();
