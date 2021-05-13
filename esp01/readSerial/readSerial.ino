@@ -1,97 +1,35 @@
-// https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/client-class.html
-#include <ESP8266WiFi.h>
- 
-#ifndef STASSID
-#define STASSID ""
-#define STAPSK  ""
-#endif
-
-#define CHECKCONNECTION 10000
-
-struct serialData{
-    int stringComplete;
-    int stringCounter;
-    char receivedString[64];
-};
-
-const char* ssid     = STASSID;
-const char* password = STAPSK;
-
-const char* host = "192.168.0.104";
-const uint16_t port = 1112;
-
-void receiveSerial(struct serialData * data);
-void sendData(struct serialData * data, WiFiClient * client);
-
+/* DS18B20 1-Wire digital temperature sensor with Arduino example code. More info: https://www.makerguides.com */
+// Include the required Arduino libraries:
+#include <OneWire.h>
+#include <DallasTemperature.h>
+// Define to which pin of the Arduino the 1-Wire bus is connected:
+#define ONE_WIRE_BUS 2
+// Create a new instance of the oneWire class to communicate with any OneWire device:
+OneWire oneWire(ONE_WIRE_BUS);
+// Pass the oneWire reference to DallasTemperature library:
+DallasTemperature sensors(&oneWire);
 void setup() {
-    Serial.begin(115200);
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
-
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-
-    Serial.println("WiFi connected");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+  // Begin serial communication at a baud rate of 9600:
+  Serial.begin(9600);
+  // Start up the library:
+  sensors.begin();
 }
-
 void loop() {
-    WiFiClient client;
-    struct serialData data = {0, 0, ""};
-    int error = 0;
-    unsigned long interval, lastInterval = 0;
-
-    if (!client.connect(host, port)) {
-        Serial.println("connection failed");
-        delay(5000);
-    }
-
-    while (error == 0){
-        // Main
-        interval = millis();
-        receiveSerial(&data);
-        sendData(&data, &client);
-
-
-        // error checking
-        if ((interval - lastInterval) > CHECKCONNECTION){
-            lastInterval = interval;
-
-            // If connection is failed
-            while (client.connected() == false){
-                if (!client.connect(host, port)) {
-                    Serial.println("connection failed");
-                    delay(5000);
-                }
-            }
-        }
-    }
-}
-
-void receiveSerial(struct serialData * data) {
-    while (Serial.available()) {
-        // get the new byte:
-        char inChar = (char)Serial.read();
-        data->receivedString[data->stringCounter] = inChar;
-        data->stringCounter++;
-        if ((inChar == '\n') || (data->stringCounter >= 63)) {
-            data->receivedString[data->stringCounter] = '\0';
-            data->stringComplete = 1;
-        }
-    }
-}
-
-void sendData(struct serialData * data, WiFiClient * client){
-    if (data->stringComplete == 1) {
-        data->stringComplete = 0;
-        data->stringCounter = 0;
-        Serial.println("Received data:");
-        Serial.println(data->receivedString);
-        client->print(data->receivedString);
-    }
+  // Send the command for all devices on the bus to perform a temperature conversion:
+  sensors.requestTemperatures();
+  // Fetch the temperature in degrees Celsius for device index:
+  float tempC = sensors.getTempCByIndex(0); // the index 0 refers to the first device
+  // Fetch the temperature in degrees Fahrenheit for device index:
+  float tempF = sensors.getTempFByIndex(0);
+  // Print the temperature in Celsius in the Serial Monitor:
+  Serial.print("Temperature: ");
+  Serial.print(tempC);
+  Serial.print(" \xC2\xB0"); // shows degree symbol
+  Serial.print("C  |  ");
+  // Print the temperature in Fahrenheit
+  Serial.print(tempF);
+  Serial.print(" \xC2\xB0"); // shows degree symbol
+  Serial.println("F");
+  // Wait 1 second:
+  delay(1000);
 }
