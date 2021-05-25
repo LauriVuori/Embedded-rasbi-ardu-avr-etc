@@ -1,14 +1,8 @@
 // https://www.geeksforgeeks.org/tcp-server-client-implementation-in-c/
 // https://www.tutorialspoint.com/unix_sockets/socket_server_example.htm
-#include <stdio.h> 
-#include <netdb.h> 
-#include <netinet/in.h> 
-#include <stdlib.h> 
-#include <string.h> 
-#include <sys/socket.h> 
-#include <sys/types.h>
 #include <../include/tcp.h>
 
+void exit_signal(int sig);
 // struct sockaddr {
 //    unsigned short   sa_family;
 //    char             sa_data[14];
@@ -26,40 +20,40 @@ int main(void) {
     // @param sockfd − It is a socket descriptor returned by the socket function.
     // @param cliaddr − It is a pointer to struct sockaddr that contains client IP address and port.
     // @param connfd − 
-    int sockfd, len; 
+    int sockfd, len;
     int acceptedClient;
     struct sockaddr_in servaddr, client;
     struct tcpErrors error = {false};
     struct tcpOptions options = {false};
-
-
+    signal(SIGINT, exit_signal); 
     char menu[5];
 
-    initSocket(&servaddr, &sockfd);
-    acceptClient(&client, &sockfd, &acceptedClient);
-
-    // Ask this
-    options.sendDataBack = true;
-    // child process???
-    // int pid = 0;
-    // pid = fork();
-    // printf("%d", pid);
-    while (menu[0] != 'e') {
-        receiveData(&acceptedClient, &error, &options);
-        // Get errors and listen new connections
-        // func(&acceptedClient);
-        printf("Out of loop: want to continue 'e' to quit\n");
-        fgets(menu, 2, stdin);
-        if (error.zeroBuffer == 1) {
-            printf("\nFOUND ERROR, TRYING TO GET CONNECTION BACK\n");
-            bzero(&client, sizeof(client));
-            acceptClient(&client, &sockfd, &acceptedClient);
-            error.zeroBuffer = 0;
-        }
+    sockfd = initSocket(&servaddr, sockfd);
+    while (sockfd < 0) {
+        sockfd = initSocket(&servaddr, sockfd);
     }
+    
+    int err = acceptClient(&client, &sockfd, acceptedClient);
+    // printf(RED"<%d>"RESET, sockfd);
+    // options.sendDataBack = true;
+
+
     close(sockfd); 
 }
-
+/* OLD MAIN*/
+// while (menu[0] != 'e') {
+//     receiveData(&acceptedClient, &error, &options);
+//     // Get errors and listen new connections
+//     // func(&acceptedClient);
+//     printf("Out of loop: want to continue 'e' to quit\n");
+//     fgets(menu, 2, stdin);
+//     if (error.zeroBuffer == 1) {
+//         printf("\nFOUND ERROR, TRYING TO GET CONNECTION BACK\n");
+//         bzero(&client, sizeof(client));
+//         acceptClient(&client, &sockfd, &acceptedClient);
+//         error.zeroBuffer = 0;
+//     }
+// }
 /*********************************************************************
 	F U N C T I O N    D E S C R I P T I O N
 ----------------------------------------------------------------------*/
@@ -96,18 +90,18 @@ void sendData(int * sockfd, char (*data)[MAX]) {
  * @fn acceptClient(struct sockaddr_in * client, int * sockfd, int * acceptClient)
  * @brief 
  * @param struct sockaddr_in* client
- * @param int* sockfd
- * @param int* acceptClient
+ * @param int sockfd
+ * @param int acceptClient
  * @return writes to target destination
 */
 /*********************************************************************/
-void acceptClient(struct sockaddr_in * client, int * sockfd, int * acceptClient) {
+int acceptClient(struct sockaddr_in * client, int * sockfd, int acceptClient) {
     int len = 0;
     /* int listen(int sockfd,int backlog);
     backlog − It is the number of allowed connections.
     */ 
     if ((listen(*sockfd, MAXCONNECTIONS) != 0)) {
-        printf("Listening failed\n");
+        printf(RED"Listening failed\n"RESET);
     }
     else {
         printf("Server listening..\n");
@@ -115,13 +109,12 @@ void acceptClient(struct sockaddr_in * client, int * sockfd, int * acceptClient)
 
     len = sizeof(client);
     // int accept (int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen);
-    *acceptClient = accept(*sockfd,(struct sockaddr*)client, &len);
-    if (*acceptClient < 0) {
+    acceptClient = accept(*sockfd,(struct sockaddr*)client, &len);
+    if (acceptClient < 0) {
         printf("Accepting server failed\n");
     }
-    else{
-        printf("Server accepted the client\n");
-    }
+
+    printf("Server accepted the client\n");
 }
 
 
@@ -136,14 +129,14 @@ void acceptClient(struct sockaddr_in * client, int * sockfd, int * acceptClient)
  * @return 
 */
 /*********************************************************************/
-void initSocket(struct sockaddr_in * servAddr, int * sockfd) {
-    *sockfd = socket(AF_INET, SOCK_STREAM, 0);
-
+int initSocket(struct sockaddr_in * servAddr, int sockfd) {
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
-        printf("ERROR opening socket\n");
+        printf(RED"ERROR opening socket\n"RESET);
+        return -1;
     }
-    else{
-        printf("Socket created\n");
+    else {
+        printf(GRN"Socket created\n"RESET);
     }
     
     bzero(servAddr, sizeof(servAddr));
@@ -151,13 +144,14 @@ void initSocket(struct sockaddr_in * servAddr, int * sockfd) {
     servAddr->sin_family = AF_INET;
     servAddr->sin_addr.s_addr = INADDR_ANY;
     servAddr->sin_port = htons(PORT);
-    // int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-    if (bind(*sockfd, (const struct sockaddr*)servAddr, sizeof(*servAddr)) < 0) {
+
+    if (bind(sockfd, (const struct sockaddr*)servAddr, sizeof(*servAddr)) < 0) {
         printf("error binding socket");
+        return -1;
     }
-    else{
-        printf("Socket binded\n");
-    }
+
+    printf(GRN"Socket binded\n"RESET);
+    return true;
 }
 
 /*********************************************************************
@@ -223,4 +217,9 @@ void func(int *sockfd) {
             break; 
         } 
     } 
+}
+
+void exit_signal(int sig) {
+    printf("CTRL-C exit");
+    exit(1);
 }
