@@ -38,57 +38,36 @@ int main(void) {
 
     /*SOCKET*/
     int sockfd, len; 
-    int acceptedClient;
     struct sockaddr_in servaddr, oneclient;
     struct tcpErrors error = {false};
     struct tcpOptions options = {false};
     char menu[5];
     /*SOCKET END*/
+    Client client[5];
+
     pthread_t  thread_id; 
 
     
-    // signal(SIGINT, exit_signal); 
+    signal(SIGINT, exit_signal); 
 
     initSocket(&servaddr, &sockfd);
-    acceptClient(&oneclient, &sockfd, &acceptedClient);
     // Client client[5];
-    // client[0].sockfd = sockfd;
-    // client[1].sockfd = sockfd;
-    // int a = pthread_create(&thread_id, NULL, acceptClientThread, (void*)&client[0]);
-    // while (client[0].acceptedClient < 0) {
-    // }
-    // printf("toimii\n");
-    // int b = pthread_create(&thread_id, NULL, acceptClientThread, (void*)&client[1]);
-    // printf("KAKSI\n");
-    // while (client[1].acceptedClient < 0) {
-    // }
-
-    // printf("WORKING");
-
-    // acceptClient(&oneclient, &sockfd, &acceptedClient);
-    options.sendDataBack = true;
-    // while (1) {
-
-    //     printf(RED"-----------DEBUG-----------\n"RESET);
-    //     printf(GRN"CLIENTS"RESET);
-    //     printf(GRN"accepteClient: <%d>\n"RESET, acceptedClient);
-    //     printf(GRN"accepteClient: <%d>\n"RESET, acceptedClient);
-    //     printf(RED"-----------DEBUG END-------\n"RESET);
-    //     sleep(2);
-    // }
-    while (menu[0] != 'e') {
-        receiveData(&acceptedClient, &error, &options);
-        // Get errors and listen new connections
-        // func(&acceptedClient);
-        printf("Out of loop: want to continue 'e' to quit\n");
-        fgets(menu, 2, stdin);
-        if (error.zeroBuffer == 1) {
-            printf("\nFOUND ERROR, TRYING TO GET CONNECTION BACK\n");
-            bzero(&oneclient, sizeof(oneclient));
-            acceptClient(&oneclient, &sockfd, &acceptedClient);
-            error.zeroBuffer = 0;
-        }
+    client[0].sockfd = sockfd;
+    client[1].sockfd = sockfd;
+    client[0].acceptedClient = -1;
+    client[1].acceptedClient = -1;
+    int a = pthread_create(&thread_id, NULL, acceptClientThread, (void*)&client[0]);
+    while (client[0].acceptedClient < 0) {
     }
+    printf("toimii\n");
+    int b = pthread_create(&thread_id, NULL, acceptClientThread, (void*)&client[1]);
+    printf("KAKSI\n");
+    while (client[1].acceptedClient < 0) {
+    }
+
+    printf("WORKING");
+
+
     close(sockfd);
     pthread_exit(NULL);
 }
@@ -122,6 +101,8 @@ void* acceptClientThread(void* data) {
     printf(RED"LEN:<%d>\n"RESET,len);
     // int accept (int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen);
     newClient->acceptedClient = accept(newClient->sockfd, (struct sockaddr*)&newClient->client, &len);
+    printf(RED"acceptedClient:<%d>\n"RESET, newClient->acceptedClient);
+
     if (newClient->acceptedClient < 0) {
         printf(RED"Accepting server failed\n"RESET);
     }
