@@ -1,5 +1,5 @@
 #include "main.h"
-
+#include "functions.h"
 /** @addtogroup STM32F3xx_HAL_Examples
   * @{
   */
@@ -17,93 +17,58 @@
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 
-void led_board_init(void);
-void led_board_toggle(void);
-void init_pa3_output(void); 
-void led_pa3_toggle(void);
-void init_board_button1(void);
-void delay_Ms(int delay);
+
 
 int main(void) {
     //HAL_Init();
     /* Configure the system clock to 64 MHz */
     SystemClock_Config();
+    //SystemCoreClockUpdate();
 
-    led_board_init();
-    init_pa3_output();
-    init_board_button1();
-    /* -3- Toggle IOs in an infinite loop */
+    //led_board_init();
+    //init_board_button1();
+    USART2_Init();
+    // init_pa3_output();
     while (1) {
-        // led_board_toggle();
         // led_pa3_toggle();
-        board_button_state();
-        HAL_Delay(100);
-    }
-}
-
-
-void led_board_init(void) {
-	// initialize board led
-
-    // RCC_AHBENR_GPIOBEN ((uint32_t)0x00040000)
-    // Bit 18 IOPBEN: I/O port B clock enable
-    // RCC->AHBENR |= (RCC_AHBENR_GPIOBEN);
-    RCC->AHBENR |= (1 << 18);
-    // MODER13 (26-27bits) pin 13
-    // 01 output
-    GPIOB->MODER |= (1 << 26);
-}
-
-void led_board_toggle(void) {
-	// switch board led state on and off
-
-    // ODR 13, pin 13, bit 13
-    GPIOB->ODR ^= (1 << 13);
-}
-
-void init_pa3_output(void) {
-	// set port a pin 3 as output
-
-    // Bit 17 IOPAEN: I/O port A clock enable
-    RCC->AHBENR |= (1 << 17);
-    // pin 0 output
-    GPIOA->MODER |= (1 << 0);
-} 
-void led_pa3_toggle(void) {
-	// toggle port a pin 3 state
-
-    // toggle ODR 0
-    GPIOA->ODR ^=  (1<<0);
-}
-void init_board_button1(void) {
-    // B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32 
-    // microcontroller.
-    // PORT C 19 bit
-    RCC->AHBENR |= (1 << 19);
-    // 01 output
-    GPIOC->MODER |= (0 << 26) | (0 << 27);
-
-}
-
-void board_button_state(void) {
-	//if PC13 is high state (button released)
-
-    if(~GPIOC->IDR & (1 << 13)) {
-        delay_Ms(20);
-        // GPIOA->BSRR=0x200000;	//turn led off (PA5=low state)
-    	led_board_toggle();
-    }
-}
-
-void delay_Ms(int delay) {
-	int i = 0;
-	for(; delay > 0; delay--) {
-		for(i = 0;i < 2460; i++); //measured with oscilloscope
+        // led_board_toggle();
+        USART2->TDR = ('a');
+        //USART2_read();
+        // board_button_state();
+        
+        HAL_Delay(500);
     }
 }
 
 
 
+
+
+// void USART2_write(char data) {
+// 	//wait while TX buffer is empty
+//     while(!(USART2->ISR & 0x80)){} 	//6. p736-737
+//         USART2->TDR=(data);		//p739
+// }
+// void USART2_write(char data)
+// {
+// 	//wait while TX buffer is empty
+// 	while((USART2->ISR & 0x80)){} 	//6. p736-737
+// 		USART2->TDR=(data);		//p739
+// }
+
+
+// void USART2_read() {
+// 	char data=0;
+// 	//wait while RX buffer is data is ready to be read
+// 	while(!(USART2->ISR & 0x0020)){
+// 		int a = USART2->ISR;
+// 	} 	//Bit 5 RXNE: Read data register not empty
+// 		data=USART2->RDR;			//p739
+//     if (data == '1') {
+//         led_board_toggle();
+//     }
+
+// }
 
 
 
