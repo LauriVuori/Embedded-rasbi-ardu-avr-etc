@@ -1,0 +1,1 @@
+#define BIT_SET(shift) (1 << (shift))
