@@ -1,9 +1,7 @@
 #include "main.h"
-#include "functions.h"
 /** @addtogroup STM32F3xx_HAL_Examples
   * @{
   */
-
 /** @addtogroup GPIO_IOToggle
   * @{
   */
@@ -23,53 +21,26 @@ int main(void) {
     //HAL_Init();
     /* Configure the system clock to 64 MHz */
     SystemClock_Config();
-    //SystemCoreClockUpdate();
+    
 
-    //led_board_init();
-    //init_board_button1();
-    USART2_Init();
-    // init_pa3_output();
+    /********* inits *******/
+    __disable_irq();
+    led_board_init();
+    // init_timer2_ISR();
+    init_timer1();
+    // USART2_Init();
+    // uint16_t a = 0;
+    __enable_irq();
+    /****** inits end *****/
     while (1) {
-        // led_pa3_toggle();
-        // led_board_toggle();
-        USART2->TDR = ('a');
-        //USART2_read();
-        // board_button_state();
-        
-        HAL_Delay(500);
+        led_board_toggle();
+        delay_ms_timer1(1000);
+        // Usart2_write_uint(1005);
+        // USART2_write_string("\n");
+        // a++;
+        // delay_ms_timer1(1000);
     }
 }
-
-
-
-
-
-// void USART2_write(char data) {
-// 	//wait while TX buffer is empty
-//     while(!(USART2->ISR & 0x80)){} 	//6. p736-737
-//         USART2->TDR=(data);		//p739
-// }
-// void USART2_write(char data)
-// {
-// 	//wait while TX buffer is empty
-// 	while((USART2->ISR & 0x80)){} 	//6. p736-737
-// 		USART2->TDR=(data);		//p739
-// }
-
-
-// void USART2_read() {
-// 	char data=0;
-// 	//wait while RX buffer is data is ready to be read
-// 	while(!(USART2->ISR & 0x0020)){
-// 		int a = USART2->ISR;
-// 	} 	//Bit 5 RXNE: Read data register not empty
-// 		data=USART2->RDR;			//p739
-//     if (data == '1') {
-//         led_board_toggle();
-//     }
-
-// }
-
 
 
 
