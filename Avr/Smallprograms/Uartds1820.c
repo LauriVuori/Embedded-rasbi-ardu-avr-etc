@@ -112,8 +112,6 @@ void USART_Transmit(uint8_t data) {
 	0000 0000 eli false, ! invertoi, joten tosi-true eli odota
 	*/ 
 	//uint16_t test = 97;
-	signed char test = 97;
-	int i = test;
 	// Put data into buffer, sends the data
 	UDR = data; // lähtevä merkki datarekisteriin
 } 
