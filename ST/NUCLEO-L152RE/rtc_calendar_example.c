@@ -45,6 +45,7 @@ void init_RTC_calendar(void);
 void init_LSE_clock(void);
 void uint8_to_char_array(uint8_t uInteger, uint8_t * dest_array);
 void set_time(uint8_t hours_tens, uint8_t hours, uint8_t minutes_tens, uint8_t minutes, uint8_t seconds_tens, uint8_t seconds);
+void set_date(uint8_t date_tens, uint8_t date, uint8_t month_tens, uint8_t month, uint8_t year_tens, uint8_t year);
 /**
 **===========================================================================
 **
@@ -83,6 +84,18 @@ int main(void)
 	uint8_t hours_char[15];
 	uint8_t hours_tens_char[15];
 
+	uint8_t days = 0;
+	uint8_t days_tens = 0;
+
+	uint8_t months = 0;
+	uint8_t months_tens = 0;
+
+	uint8_t days_char[15];
+	uint8_t days_tens_char[15];
+
+	uint8_t months_char[15];
+	uint8_t months_tens_char[15];
+
 	while(1) {
 
 		// Bits 3:0 SU[3:0]: Second units in BCD format
@@ -98,7 +111,7 @@ int main(void)
 		// Bits 21:20 HT[1:0]: Hour tens in BCD format
 		hours_tens = (RTC->TR & 0x300000) >> 20;
 		
-		
+		USART2_write_string("Time: ");
 		uint8_to_char_array(seconds, &seconds_char);
 		uint8_to_char_array(seconds_tens, &seconds_tens_char);
 
@@ -120,12 +133,69 @@ int main(void)
 		USART2_write_string(seconds_tens_char);
 		USART2_write_string(seconds_char);
 		USART2_write_string("\n\r");
+		USART2_write_string("Date: ");
+		// printf("%d%d.%d%d.%d", (temp&0x30) >> 4, temp&0xf, (temp&0x1000) >> 12, (temp&0xf00)>>8);//, temp&0xf);
+		days = RTC->DR & 0xf;
+		days_tens = (RTC->DR & 0x30) >> 4;
+
+		months_tens = (RTC->DR & 0x1000) >> 12;
+		months = (RTC->DR & 0xf00) >> 8;
+		uint8_to_char_array(days, &days_char);
+		uint8_to_char_array(days_tens, &days_tens_char);
+		uint8_to_char_array(months, &months_char);
+		uint8_to_char_array(months_tens, &months_tens_char);
+
+
+		
+		USART2_write_string(days_tens_char);
+		USART2_write_string(days_char);
+		USART2_write_string(".");
+		USART2_write_string(months_tens_char);
+		USART2_write_string(months_char);
+
+		USART2_write_string("\n\r");
 		led_board_toggle();
 
 		delay_Ms(1000);
 	}
   	return 0;
 }
+
+void set_date(uint8_t date_tens, uint8_t date, uint8_t month_tens, uint8_t month, uint8_t year_tens, uint8_t year) {
+	// Bits 31-24 Reserved
+	// Bits 23:20 YT[3:0]: Year tens in BCD format
+	// Bits 19:16 YU[3:0]: Year units in BCD format
+	// Bits 15:13 WDU[2:0]: Week day units
+	// 000: forbidden
+	// 001: Monday
+	// ...
+	// 111: Sunday
+	// Bit 12 MT: Month tens in BCD format
+	// Bits 11:8 MU: Month units in BCD format
+	// Bits 7:6 Reserved, must be kept at reset value.
+	// Bits 5:4 DT[1:0]: Date tens in BCD format
+	// Bits 3:0 DU[3:0]: Date units in BCD format
+	// set_date(2,1,0,9,2,2);
+	uint32_t temp = 0;
+    temp |= date;
+	temp |= date_tens << 4;
+    // printf("<%X>", temp);
+    temp |= month_tens << 12;
+    // set_date(2,1,0,9,20,21);
+    // temp |= (date_tens << 4);
+    temp |= (month << 8);
+    // temp |= (year_tens << 20);
+	RTC->DR = temp;
+    // temp |= (month_tens << 12);
+    // temp |= (year << 16);
+    // temp |= (year_tens << 20);
+    
+    // printf("%d%d.%d%d.%d", (temp&0x30) >> 4, temp&0xf, (temp&0x1000) >> 12, (temp&0xf00)>>8);//, temp&0xf);
+    // printf("<%X>", (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8));
+    // printf("<%X>", (1 << 1)|(1 << 0)|(1<<2)|(1<<3));
+    // printf("<%X>", (1 << 23)|(1 << 22)|(1<<21)|(1<<20));
+}
+
 void set_time(uint8_t hours_tens, uint8_t hours, uint8_t minutes_tens, uint8_t minutes, uint8_t seconds_tens, uint8_t seconds) {
 	// seconds = RTC->TR & 0xF;
 	// // Bits 6:4 ST[2:0]: Second tens in BCD format
@@ -277,8 +347,9 @@ void init_RTC_calendar(void) {
 	// Bits 3:0 SU[3:0]: Second units in BCD format
 
 	set_time(2,3,5,9,5,1);
+	set_date(2,1,0,9,2,2);
 	// RTC->TR = 0x111115;
-	RTC->DR = 0x00002101;
+	// RTC->DR = 0x00002101;
 	// delay_Ms(1000);
 
 	// Turn of init mode
