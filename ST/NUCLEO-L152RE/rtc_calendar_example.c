@@ -44,7 +44,7 @@ void led_board_toggle();
 void init_RTC_calendar(void);
 void init_LSE_clock(void);
 
-void uint8_to_char_array(uint8_t uInteger, uint8_t * dest_array, uint8_t * counter);
+void uint8_to_char_array(uint8_t uInteger, char * dest_array, uint8_t * counter);
 void set_time(char new_time[]);
 void set_date(char new_date[]);
 void get_time_to_buffer(char time_buf[]);
@@ -199,11 +199,11 @@ void set_date(char new_date[]) {
 	// "24.09.2021"
 	uint32_t temp = 0;
     temp |= new_date[1]-'0';
-	temp |= new_date[0]-'0' << 4;
-    temp |= new_date[3]-'0' << 12;
-    temp |= (new_date[4]-'0' << 8);
-    temp |= (new_date[8]-'0' << 20);
-	temp |= (new_date[9]-'0' << 16);
+	temp |= (new_date[0]-'0') << 4;
+    temp |= (new_date[3]-'0') << 12;
+    temp |= (new_date[4]-'0') << 8;
+    temp |= (new_date[8]-'0') << 20;
+	temp |= (new_date[9]-'0') << 16;
 
 	RTC->DR = temp;
 }
@@ -224,11 +224,11 @@ void set_time(char new_time[]) {
 	uint32_t temp = 0;
 	// "15:51:00"
 	temp |= new_time[7]-'0';
-	temp |= new_time[6]-'0' << 4;
-	temp |= new_time[4]-'0' << 8;
-	temp |= new_time[3]-'0' << 12;
-	temp |= new_time[1]-'0' << 16;
-	temp |= new_time[0]-'0' << 20;
+	temp |= (new_time[6]-'0') << 4;
+	temp |= (new_time[4]-'0') << 8;
+	temp |= (new_time[3]-'0') << 12;
+	temp |= (new_time[1]-'0') << 16;
+	temp |= (new_time[0]-'0') << 20;
 	
 	RTC->TR = temp; 					//set new time
 
@@ -436,7 +436,7 @@ void delay_Ms(int delay)
 		for(i=0;i<2460;i++); //measured with oscilloscope
 }
 
-void uint8_to_char_array(uint8_t uInteger, uint8_t * dest_array, uint8_t * counter) {
+void uint8_to_char_array(uint8_t uInteger, char * dest_array, uint8_t * counter) {
     // needs atleast [6] array
 	uint8_t* ptr_to_buffer;
 	uint8_t int_buffer [5];
