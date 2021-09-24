@@ -43,9 +43,13 @@ void init_led_board_portb(void);
 void led_board_toggle();
 void init_RTC_calendar(void);
 void init_LSE_clock(void);
-void uint8_to_char_array(uint8_t uInteger, uint8_t * dest_array);
-void set_time(uint8_t hours_tens, uint8_t hours, uint8_t minutes_tens, uint8_t minutes, uint8_t seconds_tens, uint8_t seconds);
-void set_date(uint8_t date_tens, uint8_t date, uint8_t month_tens, uint8_t month, uint8_t year_tens, uint8_t year);
+
+void uint8_to_char_array(uint8_t uInteger, uint8_t * dest_array, uint8_t * counter);
+void set_time(char new_time[]);
+void set_date(char new_date[]);
+void get_time_to_buffer(char time_buf[]);
+void get_date_to_buffer(char date_buf[], char current_thousands_year[]);
+
 /**
 **===========================================================================
 **
@@ -53,8 +57,9 @@ void set_date(uint8_t date_tens, uint8_t date, uint8_t month_tens, uint8_t month
 **
 **===========================================================================
 */
-int main(void)
-{
+// In current RTC implementation it is possible to just set 20 last two numbers in years
+
+int main(void) {
 	/* Configure the system clock to 32 MHz and update SystemCoreClock */
 	SetSysClock();
 	SystemCoreClockUpdate();
@@ -68,91 +73,19 @@ int main(void)
 
 	// Just to show that system is booting
 	USART2_write_string("SYSTEM BOOT\n\r");
-	uint8_t seconds = 0;
-	uint8_t seconds_tens = 0;
-	uint8_t minutes = 0;
-	uint8_t minutes_tens = 0;
-	uint8_t hours = 0;
-	uint8_t hours_tens = 0;
 
-	uint8_t seconds_char[15];
-	uint8_t seconds_tens_char[15];
+	char time_buffer[90];
+	char date_buffer[90];
 
-	uint8_t minutes_char[15];
-	uint8_t minutes_tens_char[15];
-
-	uint8_t hours_char[15];
-	uint8_t hours_tens_char[15];
-
-	uint8_t days = 0;
-	uint8_t days_tens = 0;
-
-	uint8_t months = 0;
-	uint8_t months_tens = 0;
-
-	uint8_t days_char[15];
-	uint8_t days_tens_char[15];
-
-	uint8_t months_char[15];
-	uint8_t months_tens_char[15];
-
+	char current_thousand_year[3] = "20";
 	while(1) {
-
-		// Bits 3:0 SU[3:0]: Second units in BCD format
-		seconds = RTC->TR & 0xF;
-		// Bits 6:4 ST[2:0]: Second tens in BCD format
-		seconds_tens = (RTC->TR & 0x70) >> 4;
-		// Bit 11:8 MNU[3:0]: Minute units in BCD format
-		minutes = (RTC->TR & 0xF00) >> 8;
-		// Bits 14:12 MNT[2:0]: Minute tens in BCD format
-		minutes_tens = (RTC->TR & 0x7000) >> 12;
-		// Bits 19:16 HU[3:0]: Hour units in BCD format
-		hours = (RTC->TR & 0xF0000) >> 16;
-		// Bits 21:20 HT[1:0]: Hour tens in BCD format
-		hours_tens = (RTC->TR & 0x300000) >> 20;
-		
+		get_time_to_buffer(time_buffer);
+		get_date_to_buffer(date_buffer, current_thousand_year);
 		USART2_write_string("Time: ");
-		uint8_to_char_array(seconds, &seconds_char);
-		uint8_to_char_array(seconds_tens, &seconds_tens_char);
-
-		uint8_to_char_array(minutes, &minutes_char);
-		uint8_to_char_array(minutes_tens, &minutes_tens_char);
-
-		uint8_to_char_array(hours, &hours_char);
-		uint8_to_char_array(hours_tens, &hours_tens_char);
-		
-		USART2_write_string(hours_tens_char);
-		USART2_write_string(hours_char);
-		USART2_write_string(":");
-
-		USART2_write_string(minutes_tens_char);
-		USART2_write_string(minutes_char);
-
-		USART2_write_string(":");
-
-		USART2_write_string(seconds_tens_char);
-		USART2_write_string(seconds_char);
+		USART2_write_string(time_buffer);
 		USART2_write_string("\n\r");
 		USART2_write_string("Date: ");
-		// printf("%d%d.%d%d.%d", (temp&0x30) >> 4, temp&0xf, (temp&0x1000) >> 12, (temp&0xf00)>>8);//, temp&0xf);
-		days = RTC->DR & 0xf;
-		days_tens = (RTC->DR & 0x30) >> 4;
-
-		months_tens = (RTC->DR & 0x1000) >> 12;
-		months = (RTC->DR & 0xf00) >> 8;
-		uint8_to_char_array(days, &days_char);
-		uint8_to_char_array(days_tens, &days_tens_char);
-		uint8_to_char_array(months, &months_char);
-		uint8_to_char_array(months_tens, &months_tens_char);
-
-
-		
-		USART2_write_string(days_tens_char);
-		USART2_write_string(days_char);
-		USART2_write_string(".");
-		USART2_write_string(months_tens_char);
-		USART2_write_string(months_char);
-
+		USART2_write_string(date_buffer);
 		USART2_write_string("\n\r");
 		led_board_toggle();
 
@@ -161,7 +94,95 @@ int main(void)
   	return 0;
 }
 
-void set_date(uint8_t date_tens, uint8_t date, uint8_t month_tens, uint8_t month, uint8_t year_tens, uint8_t year) {
+void get_date_to_buffer(char date_buf[], char current_thousands_year[]) {
+	// Variable to every unit just to clarify different units
+	uint8_t days = 0;
+	uint8_t days_tens = 0;
+
+	uint8_t months = 0;
+	uint8_t months_tens = 0;
+
+	uint8_t years = 0;
+	uint8_t years_tens = 0;
+
+	uint8_t counter = 0;
+		
+	// Bits 3:0 DU[3:0]: Date units in BCD format
+	days = RTC->DR & 0xf;
+	// Bits 5:4 DT[1:0]: Date tens in BCD format
+	days_tens = (RTC->DR & 0x30) >> 4;
+	// Bit 12 MT: Month tens in BCD format
+	months_tens = (RTC->DR & 0x1000) >> 12;
+	// Bits 11:8 MU: Month units in BCD format
+	months = (RTC->DR & 0xf00) >> 8;
+	// Bits 19:16 YU[3:0]: Year units in BCD format
+	years = (RTC->DR & 0xF0000) >> 16;
+	// Bits 23:20 YT[3:0]: Year tens in BCD format
+	years_tens = (RTC->DR & 0xF00000) >> 20;
+
+	//24.			days
+	uint8_to_char_array(days_tens, &date_buf[counter], &counter);
+	uint8_to_char_array(days, &date_buf[counter], &counter);
+	date_buf[counter] = '.';
+	counter++;
+
+	//24.09			months
+	uint8_to_char_array(months_tens, &date_buf[counter], &counter);
+	uint8_to_char_array(months, &date_buf[counter], &counter);
+	date_buf[counter] = '.';
+	counter++;
+
+	//24.09.2021	years
+	date_buf[counter] = current_thousands_year[0];
+	counter++;
+	
+	date_buf[counter] = current_thousands_year[1];
+	counter++;
+	uint8_to_char_array(years_tens, &date_buf[counter], &counter);
+	uint8_to_char_array(years, &date_buf[counter], &counter);
+}
+
+void get_time_to_buffer(char time_buf[]) {
+	// Variable to every unit just to clarify different units
+	uint8_t seconds = 0;
+	uint8_t seconds_tens = 0;
+
+	uint8_t minutes = 0;
+	uint8_t minutes_tens = 0;
+
+	uint8_t hours = 0;
+	uint8_t hours_tens = 0;
+
+	uint8_t counter = 0;
+
+	// Bits 3:0 SU[3:0]: Second units in BCD format
+	seconds = RTC->TR & 0xF;
+	// Bits 6:4 ST[2:0]: Second tens in BCD format
+	seconds_tens = (RTC->TR & 0x70) >> 4;
+	// Bit 11:8 MNU[3:0]: Minute units in BCD format
+	minutes = (RTC->TR & 0xF00) >> 8;
+	// Bits 14:12 MNT[2:0]: Minute tens in BCD format
+	minutes_tens = (RTC->TR & 0x7000) >> 12;
+	// Bits 19:16 HU[3:0]: Hour units in BCD format
+	hours = (RTC->TR & 0xF0000) >> 16;
+	// Bits 21:20 HT[1:0]: Hour tens in BCD format
+	hours_tens = (RTC->TR & 0x300000) >> 20;
+	//14:			hours
+	uint8_to_char_array(hours_tens, &time_buf[counter], &counter);
+	uint8_to_char_array(hours, &time_buf[counter], &counter);
+	time_buf[counter] = ':';
+	counter++;
+	//14:55			minutes
+	uint8_to_char_array(minutes_tens, &time_buf[counter], &counter);
+	uint8_to_char_array(minutes, &time_buf[counter], &counter);
+	time_buf[counter] = ':';
+	counter++;
+	//14:55:25		seconds
+	uint8_to_char_array(seconds_tens, &time_buf[counter], &counter);
+	uint8_to_char_array(seconds, &time_buf[counter], &counter);
+}
+
+void set_date(char new_date[]) {
 	// Bits 31-24 Reserved
 	// Bits 23:20 YT[3:0]: Year tens in BCD format
 	// Bits 19:16 YU[3:0]: Year units in BCD format
@@ -175,28 +196,19 @@ void set_date(uint8_t date_tens, uint8_t date, uint8_t month_tens, uint8_t month
 	// Bits 7:6 Reserved, must be kept at reset value.
 	// Bits 5:4 DT[1:0]: Date tens in BCD format
 	// Bits 3:0 DU[3:0]: Date units in BCD format
-	// set_date(2,1,0,9,2,2);
+	// "24.09.2021"
 	uint32_t temp = 0;
-    temp |= date;
-	temp |= date_tens << 4;
-    // printf("<%X>", temp);
-    temp |= month_tens << 12;
-    // set_date(2,1,0,9,20,21);
-    // temp |= (date_tens << 4);
-    temp |= (month << 8);
-    // temp |= (year_tens << 20);
+    temp |= new_date[1]-'0';
+	temp |= new_date[0]-'0' << 4;
+    temp |= new_date[3]-'0' << 12;
+    temp |= (new_date[4]-'0' << 8);
+    temp |= (new_date[8]-'0' << 20);
+	temp |= (new_date[9]-'0' << 16);
+
 	RTC->DR = temp;
-    // temp |= (month_tens << 12);
-    // temp |= (year << 16);
-    // temp |= (year_tens << 20);
-    
-    // printf("%d%d.%d%d.%d", (temp&0x30) >> 4, temp&0xf, (temp&0x1000) >> 12, (temp&0xf00)>>8);//, temp&0xf);
-    // printf("<%X>", (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8));
-    // printf("<%X>", (1 << 1)|(1 << 0)|(1<<2)|(1<<3));
-    // printf("<%X>", (1 << 23)|(1 << 22)|(1<<21)|(1<<20));
 }
 
-void set_time(uint8_t hours_tens, uint8_t hours, uint8_t minutes_tens, uint8_t minutes, uint8_t seconds_tens, uint8_t seconds) {
+void set_time(char new_time[]) {
 	// seconds = RTC->TR & 0xF;
 	// // Bits 6:4 ST[2:0]: Second tens in BCD format
 	// seconds_tens = (RTC->TR & 0x70) >> 4;
@@ -208,14 +220,15 @@ void set_time(uint8_t hours_tens, uint8_t hours, uint8_t minutes_tens, uint8_t m
 	// hours = (RTC->TR & 0xF0000) >> 16;
 	// // Bits 21:20 HT[1:0]: Hour tens in BCD format
 	// hours_tens = (RTC->TR & 0x300000) >> 20;
-	uint32_t temp = 0;
 
-	temp |= seconds;
-	temp |= seconds_tens << 4;
-	temp |= minutes << 8;
-	temp |= minutes_tens << 12;
-	temp |= hours << 16;
-	temp |= hours_tens << 20;
+	uint32_t temp = 0;
+	// "15:51:00"
+	temp |= new_time[7]-'0';
+	temp |= new_time[6]-'0' << 4;
+	temp |= new_time[4]-'0' << 8;
+	temp |= new_time[3]-'0' << 12;
+	temp |= new_time[1]-'0' << 16;
+	temp |= new_time[0]-'0' << 20;
 	
 	RTC->TR = temp; 					//set new time
 
@@ -224,7 +237,6 @@ void set_time(uint8_t hours_tens, uint8_t hours, uint8_t minutes_tens, uint8_t m
 // Control/status register (RCC_CSR)
 // Setting LSE
 void init_LSE_clock(void) {
-
 
 	// Bit 8 LSEON: External low-speed oscillator enable
 	// This bit is set and cleared by software.
@@ -346,12 +358,18 @@ void init_RTC_calendar(void) {
 	// Bits 6:4 ST[2:0]: Second tens in BCD format
 	// Bits 3:0 SU[3:0]: Second units in BCD format
 
-	set_time(2,3,5,9,5,1);
-	set_date(2,1,0,9,2,2);
+	set_time("15:53:00");
+	set_date("24.09.2021");
 	// RTC->TR = 0x111115;
 	// RTC->DR = 0x00002101;
 	// delay_Ms(1000);
 
+	// Bit 10 DBG_RTC_STOP: Debug RTC stopped when core is halted
+	// 0: The clock of the RTC counter is fed even if the core is halted
+	// 1: The clock of the RTC counter is stopped when the core is halted
+	// Note: This bit is available only in Cat.2, Cat.3, Cat.4, Cat.5 and Cat.6 devices
+	// DBGMCU->APB1FZ |= (1 << 10);		//Freeze RTC while debugging
+	/*******************/
 	// Turn of init mode
 	RTC->ISR &= ~(1 << 7);
 	while (RTC->ISR & (1 << 6));
@@ -418,7 +436,7 @@ void delay_Ms(int delay)
 		for(i=0;i<2460;i++); //measured with oscilloscope
 }
 
-void uint8_to_char_array(uint8_t uInteger, uint8_t * dest_array) {
+void uint8_to_char_array(uint8_t uInteger, uint8_t * dest_array, uint8_t * counter) {
     // needs atleast [6] array
 	uint8_t* ptr_to_buffer;
 	uint8_t int_buffer [5];
@@ -433,6 +451,7 @@ void uint8_to_char_array(uint8_t uInteger, uint8_t * dest_array) {
         *dest_array = *ptr_to_buffer;
         dest_array++;
         ptr_to_buffer++;
+		*counter += 1;
 	}
     // end char
     *dest_array = '\0';
